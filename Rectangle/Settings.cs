@@ -16,10 +16,10 @@ namespace Rectangle
         {
             InitializeComponent();
 
-            HotKeyManager.RegisterHotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Shift);
-            HotKeyManager.RegisterHotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Shift);
-            HotKeyManager.RegisterHotKey(Keys.J, KeyModifiers.Control | KeyModifiers.Shift);
-            HotKeyManager.RegisterHotKey(Keys.K, KeyModifiers.Control | KeyModifiers.Shift);
+            HotKeyManager.RegisterHotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Windows);
+            HotKeyManager.RegisterHotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Windows);
+            HotKeyManager.RegisterHotKey(Keys.J, KeyModifiers.Control | KeyModifiers.Windows);
+            HotKeyManager.RegisterHotKey(Keys.K, KeyModifiers.Control | KeyModifiers.Windows);
 
             HotKeyManager.RegisterHotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Alt);
             HotKeyManager.RegisterHotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Alt);
@@ -37,7 +37,7 @@ namespace Rectangle
             switch (e.Key)
             {
                 case Keys.H:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift))
+                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
                     {
                         this.TopLeft();
                     }
@@ -47,7 +47,7 @@ namespace Rectangle
                     }
                     break;
                 case Keys.L:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift))
+                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
                     {
                         this.TopRight();
                     }
@@ -57,13 +57,13 @@ namespace Rectangle
                     }
                     break;
                 case Keys.J:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift))
+                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
                     {
                         this.BottomLeft();
                     }
                     break;
                 case Keys.K:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift))
+                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
                     {
                         this.BottomRight();
                     }
