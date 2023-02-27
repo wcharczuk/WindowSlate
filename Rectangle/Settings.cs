@@ -99,7 +99,7 @@ namespace Rectangle
                 Top = monitorRect.Top,
                 Right = monitorRect.Right,
                 Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
-            }); 
+            });
         }
 
         private void HalfLeft()
@@ -214,7 +214,7 @@ namespace Rectangle
                 Bottom = monitorRect.Top + (monitorHeight >> 1),
             });
         }
-        
+
         private void BottomLeft()
         {
             var window = Win32Util.GetForegroundWindow();
