@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -79,12 +80,21 @@ namespace Rectangle
             Win32.GetMonitorInfo(hmonitor, minfo);
             return minfo;
         }
+
+        public static RECT GetTaskBarRect()
+        {
+            var taskbar = Win32.FindWindow("Shell_traywnd", "");
+            return Win32Util.GetWindowRect(taskbar);
+        }
     }
 
     static class Win32
     {
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
         [DllImport("user32.dll")]
         public static extern int GetWindowTextLength(IntPtr hWnd);

@@ -81,14 +81,16 @@ namespace Rectangle
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
+            var taskbarRect = Win32Util.GetTaskBarRect();
+            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
 
             Win32Util.MoveWindow(window, windowRect with
             {
                 Left = 0,
                 Top = 0,
                 Right = monitorRect.Right,
-                Bottom = monitorRect.Bottom
-            });
+                Bottom = monitorRect.Bottom - taskbarHeight
+            }); ;
         }
         private void TopLeft()
         {
@@ -111,6 +113,8 @@ namespace Rectangle
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
+            var taskbarRect = Win32Util.GetTaskBarRect();
+            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
 
             // if in 1/3 -> 1/2
             // if in 1/2 -> 2/3
@@ -140,7 +144,7 @@ namespace Rectangle
                 Left = 0,
                 Top = 0,
                 Right = right,
-                Bottom = monitorRect.Bottom
+                Bottom = monitorRect.Bottom - taskbarHeight
             });
         }
         private void TopRight()
@@ -164,6 +168,8 @@ namespace Rectangle
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
+            var taskbarRect = Win32Util.GetTaskBarRect();
+            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
 
             // if in 1/3 -> 1/2
             // if in 1/2 -> 2/3
@@ -193,7 +199,7 @@ namespace Rectangle
                 Left = left,
                 Top = 0,
                 Right = monitorRect.Right,
-                Bottom = monitorRect.Bottom
+                Bottom = monitorRect.Bottom - taskbarHeight
             });
         }
         private void BottomLeft()
@@ -202,13 +208,15 @@ namespace Rectangle
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
+            var taskbarRect = Win32Util.GetTaskBarRect();
+            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
 
             Win32Util.MoveWindow(window, windowRect with
             {
                 Left = 0,
                 Top = monitorRect.Bottom >> 1,
                 Right = monitorRect.Right >> 1,
-                Bottom = monitorRect.Bottom
+                Bottom = monitorRect.Bottom - taskbarHeight
             });
         }
         private void BottomRight()
@@ -217,13 +225,15 @@ namespace Rectangle
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
+            var taskbarRect = Win32Util.GetTaskBarRect();
+            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
 
             Win32Util.MoveWindow(window, windowRect with
             {
                 Left = monitorRect.Right >> 1,
                 Top = monitorRect.Bottom >> 1,
                 Right = monitorRect.Right,
-                Bottom = monitorRect.Bottom
+                Bottom = monitorRect.Bottom - taskbarHeight
             });
         }
     }
