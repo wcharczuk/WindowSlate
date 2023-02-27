@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -45,6 +46,10 @@ namespace Rectangle
                     {
                         this.HalfLeft();
                     }
+                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt))
+                    {
+                        this.PreviousDisplay();
+                    }
                     break;
                 case Keys.L:
                     if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
@@ -54,6 +59,10 @@ namespace Rectangle
                     else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
                     {
                         this.HalfRight();
+                    }
+                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt))
+                    {
+                        this.NextDisplay();
                     }
                     break;
                 case Keys.J:
@@ -86,65 +95,106 @@ namespace Rectangle
 
             Win32Util.MoveWindow(window, windowRect with
             {
-                Left = 0,
-                Top = 0,
+                Left = monitorRect.Left,
+                Top = monitorRect.Top,
                 Right = monitorRect.Right,
-                Bottom = monitorRect.Bottom - taskbarHeight
-            }); ;
+                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
+            }); 
         }
+
+        private void HalfLeft()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            var monitor = Win32Util.GetMonitorInfo(window);
+            var windowRect = Win32Util.GetWindowRect(window);
+
+            var windowWidth = windowRect.Right - windowRect.Left;
+            var monitorRect = monitor.rcMonitor;
+            var taskbarRect = Win32Util.GetTaskBarRect();
+            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
+            var monitorWidth = monitorRect.Right - monitorRect.Left;
+
+            var half = monitorWidth >> 1;
+            var third = monitorWidth / 3;
+            var twoThird = (monitorWidth / 3) << 1;
+
+            var newWidth = half; // default is 1/2
+            if (windowWidth == third)
+            {
+                newWidth = half;
+            }
+            else if (windowWidth == half)
+            {
+                newWidth = twoThird;
+            }
+            else if (windowWidth == twoThird)
+            {
+                newWidth = third;
+            }
+
+            Win32Util.MoveWindow(window, windowRect with
+            {
+                Left = monitorRect.Left,
+                Top = monitorRect.Top,
+                Right = monitorRect.Left + newWidth,
+                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
+            });
+        }
+        private void HalfRight()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            var monitor = Win32Util.GetMonitorInfo(window);
+            var windowRect = Win32Util.GetWindowRect(window);
+
+            var windowWidth = windowRect.Right - windowRect.Left;
+            var monitorRect = monitor.rcMonitor;
+            var taskbarRect = Win32Util.GetTaskBarRect();
+            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
+
+            var monitorWidth = monitorRect.Right - monitorRect.Left;
+
+            var half = monitorWidth >> 1;
+            var third = monitorWidth / 3;
+            var twoThird = (monitorWidth / 3) << 1;
+
+            var newWidth = half; // default is 1/2
+            if (windowWidth == third)
+            {
+                newWidth = half;
+            }
+            else if (windowWidth == half)
+            {
+                newWidth = twoThird;
+            }
+            else if (windowWidth == twoThird)
+            {
+                newWidth = third;
+            }
+
+            Win32Util.MoveWindow(window, windowRect with
+            {
+                Left = monitorRect.Right - newWidth,
+                Top = monitorRect.Top,
+                Right = monitorRect.Right,
+                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
+            });
+        }
+
         private void TopLeft()
         {
             var window = Win32Util.GetForegroundWindow();
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
+            var monitorWidth = monitorRect.Right - monitorRect.Left;
+            var monitorHeight = monitorRect.Bottom - monitorRect.Top;
 
             Win32Util.MoveWindow(window, windowRect with
             {
-                Left = 0,
-                Top = 0,
-                Right = monitorRect.Right >> 1,
-                Bottom = monitorRect.Bottom >> 1
-            });
-        }
-        private void HalfLeft()
-        {
-            var window = Win32Util.GetForegroundWindow();
-            var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
-            var monitorRect = monitor.rcMonitor;
-            var taskbarRect = Win32Util.GetTaskBarRect();
-            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
-
-            // if in 1/3 -> 1/2
-            // if in 1/2 -> 2/3
-            // if in 2/3 -> 1/3
-            // else -> 1/2
-
-            var half = monitorRect.Right >> 1;
-            var third = monitorRect.Right / 3;
-            var twoThird = (monitorRect.Right / 3) << 1;
-
-            var right = half; // default is 1/2
-            if (windowRect.Right == third)
-            {
-                right = half;
-            }
-            else if (windowRect.Right == half)
-            {
-                right = twoThird;
-            }
-            else if (windowRect.Right == twoThird)
-            {
-                right = third;
-            }
-
-            Win32Util.MoveWindow(window, windowRect with
-            {
-                Left = 0,
-                Top = 0,
-                Right = right,
-                Bottom = monitorRect.Bottom - taskbarHeight
+                Left = monitorRect.Left,
+                Top = monitorRect.Top,
+                Right = monitorRect.Left + (monitorWidth >> 1),
+                Bottom = monitorRect.Top + (monitorHeight >> 1)
             });
         }
         private void TopRight()
@@ -153,70 +203,37 @@ namespace Rectangle
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
+            var monitorWidth = monitorRect.Right - monitorRect.Left;
+            var monitorHeight = monitorRect.Bottom - monitorRect.Top;
 
             Win32Util.MoveWindow(window, windowRect with
             {
-                Left = monitorRect.Right >> 1,
-                Top = 0,
+                Left = monitorRect.Left + (monitorWidth >> 1),
+                Top = monitorRect.Top,
                 Right = monitorRect.Right,
-                Bottom = monitorRect.Bottom >> 1
+                Bottom = monitorRect.Top + (monitorHeight >> 1),
             });
         }
-        private void HalfRight()
-        {
-            var window = Win32Util.GetForegroundWindow();
-            var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
-            var monitorRect = monitor.rcMonitor;
-            var taskbarRect = Win32Util.GetTaskBarRect();
-            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
-
-            // if in 1/3 -> 1/2
-            // if in 1/2 -> 2/3
-            // if in 2/3 -> 1/3
-            // else -> 1/2
-
-            var half = monitorRect.Right >> 1;
-            var twoThird = monitorRect.Right / 3;
-            var third = (monitorRect.Right / 3) << 1;
-
-            var left = half; // default is 1/2
-            if (windowRect.Left == third)
-            {
-                left = half;
-            }
-            else if (windowRect.Left == half)
-            {
-                left = twoThird;
-            }
-            else if (windowRect.Left == twoThird)
-            {
-                left = third;
-            }
-
-            Win32Util.MoveWindow(window, windowRect with
-            {
-                Left = left,
-                Top = 0,
-                Right = monitorRect.Right,
-                Bottom = monitorRect.Bottom - taskbarHeight
-            });
-        }
+        
         private void BottomLeft()
         {
             var window = Win32Util.GetForegroundWindow();
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
+
             var taskbarRect = Win32Util.GetTaskBarRect();
             var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
 
+            var monitorWidth = monitorRect.Right - monitorRect.Left;
+            var monitorHeight = monitorRect.Bottom - monitorRect.Top;
+
             Win32Util.MoveWindow(window, windowRect with
             {
-                Left = 0,
-                Top = monitorRect.Bottom >> 1,
-                Right = monitorRect.Right >> 1,
-                Bottom = monitorRect.Bottom - taskbarHeight
+                Left = monitorRect.Left,
+                Top = monitorRect.Top + (monitorHeight >> 1),
+                Right = monitorRect.Left + (monitorWidth >> 1),
+                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
             });
         }
         private void BottomRight()
@@ -224,17 +241,91 @@ namespace Rectangle
             var window = Win32Util.GetForegroundWindow();
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
+
             var monitorRect = monitor.rcMonitor;
+
             var taskbarRect = Win32Util.GetTaskBarRect();
             var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
 
+            var monitorWidth = monitorRect.Right - monitorRect.Left;
+            var monitorHeight = monitorRect.Bottom - monitorRect.Top;
+
             Win32Util.MoveWindow(window, windowRect with
             {
-                Left = monitorRect.Right >> 1,
-                Top = monitorRect.Bottom >> 1,
+                Left = monitorRect.Left + (monitorWidth >> 1),
+                Top = monitorRect.Top + (monitorHeight >> 1),
                 Right = monitorRect.Right,
-                Bottom = monitorRect.Bottom - taskbarHeight
+                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
             });
+        }
+
+        private void PreviousDisplay()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            var windowRect = Win32Util.GetWindowRect(window);
+
+            var windowWidth = windowRect.Right - windowRect.Left;
+            var windowHeight = windowRect.Bottom - windowRect.Top;
+
+            var monitorIndex = this.GetMonitorIndex() - 1;
+            if (monitorIndex < 0)
+            {
+                monitorIndex = Screen.AllScreens.Length - 1;
+            }
+            var nextScreen = Screen.AllScreens[monitorIndex];
+
+            Win32Util.MoveWindow(window, windowRect with
+            {
+                Left = nextScreen.Bounds.X,
+                Top = nextScreen.Bounds.Y,
+                Right = nextScreen.Bounds.X + windowWidth,
+                Bottom = nextScreen.Bounds.Y + windowHeight
+            });
+        }
+        private void NextDisplay()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            var windowRect = Win32Util.GetWindowRect(window);
+
+            var windowWidth = windowRect.Right - windowRect.Left;
+            var windowHeight = windowRect.Bottom - windowRect.Top;
+
+            var monitorIndex = this.GetMonitorIndex();
+            var nextScreen = Screen.AllScreens[(monitorIndex + 1) % Screen.AllScreens.Length];
+
+            Win32Util.MoveWindow(window, windowRect with
+            {
+                Left = nextScreen.Bounds.X,
+                Top = nextScreen.Bounds.Y,
+                Right = nextScreen.Bounds.X + windowWidth,
+                Bottom = nextScreen.Bounds.Y + windowHeight
+            });
+        }
+
+        private bool IsPrimary()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            var monitor = Win32Util.GetMonitorInfo(window);
+
+            return monitor.dwFlags == 0x1;
+        }
+
+        private int GetMonitorIndex()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            var monitor = Win32Util.GetMonitorInfo(window);
+            var monitorDeviceName = new String(monitor.szDevice);
+            var monitorDeviceNameClean = monitorDeviceName.Substring(0, monitorDeviceName.IndexOf((char)0));
+
+            for (int index = 0; index < Screen.AllScreens.Length; index++)
+            {
+                var screen = Screen.AllScreens[index];
+                if (screen.DeviceName == monitorDeviceNameClean)
+                {
+                    return index;
+                }
+            }
+            throw new Exception($"Could not find index of monitor with device name {monitorDeviceNameClean}");
         }
     }
 }
