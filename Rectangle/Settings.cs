@@ -158,17 +158,22 @@ namespace Rectangle
             var twoThird = (monitorWidth / 3) << 1;
 
             var newWidth = half; // default is 1/2
-            if (windowWidth == third)
+            var newBottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom;
+
+            if (windowRect.Top == monitorRect.Top && windowRect.Bottom == newBottom)
             {
-                newWidth = half;
-            }
-            else if (windowWidth == half)
-            {
-                newWidth = twoThird;
-            }
-            else if (windowWidth == twoThird)
-            {
-                newWidth = third;
+                if (windowWidth == third)
+                {
+                    newWidth = half;
+                }
+                else if (windowWidth == half)
+                {
+                    newWidth = twoThird;
+                }
+                else if (windowWidth == twoThird)
+                {
+                    newWidth = third;
+                }
             }
 
             Win32Util.MoveWindow(window, windowRect with
@@ -176,7 +181,7 @@ namespace Rectangle
                 Left = monitorRect.Left,
                 Top = monitorRect.Top,
                 Right = monitorRect.Left + newWidth,
-                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
+                Bottom = newBottom,
             });
         }
         private void HalfRight()
@@ -198,17 +203,22 @@ namespace Rectangle
             var twoThird = (monitorWidth / 3) << 1;
 
             var newWidth = half; // default is 1/2
-            if (windowWidth == third)
+            var newBottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom;
+
+            if (windowRect.Top == monitorRect.Top && windowRect.Bottom == newBottom)
             {
-                newWidth = half;
-            }
-            else if (windowWidth == half)
-            {
-                newWidth = twoThird;
-            }
-            else if (windowWidth == twoThird)
-            {
-                newWidth = third;
+                if (windowWidth == third)
+                {
+                    newWidth = half;
+                }
+                else if (windowWidth == half)
+                {
+                    newWidth = twoThird;
+                }
+                else if (windowWidth == twoThird)
+                {
+                    newWidth = third;
+                }
             }
 
             Win32Util.MoveWindow(window, windowRect with
@@ -216,7 +226,7 @@ namespace Rectangle
                 Left = monitorRect.Right - newWidth,
                 Top = monitorRect.Top,
                 Right = monitorRect.Right,
-                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
+                Bottom = newBottom,
             });
         }
 
