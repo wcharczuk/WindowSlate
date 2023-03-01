@@ -43,11 +43,13 @@
             label1 = new Label();
             helpText = new Label();
             notifyIcon1 = new NotifyIcon(components);
+            label11 = new Label();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(label11);
             groupBox1.Controls.Add(label9);
             groupBox1.Controls.Add(label10);
             groupBox1.Controls.Add(label8);
@@ -73,7 +75,7 @@
             label9.Name = "label9";
             label9.Size = new Size(183, 17);
             label9.TabIndex = 8;
-            label9.Text = "Next Display - shift+ctrl+alt+L\r\n";
+            label9.Text = "Next Display - shift+ctrl+alt+L";
             // 
             // label10
             // 
@@ -82,7 +84,7 @@
             label10.Name = "label10";
             label10.Size = new Size(208, 17);
             label10.TabIndex = 7;
-            label10.Text = "Previous Display - shift+ctrl+alt+H\r\n";
+            label10.Text = "Previous Display - shift+ctrl+alt+H";
             // 
             // label8
             // 
@@ -100,7 +102,7 @@
             label7.Name = "label7";
             label7.Size = new Size(134, 17);
             label7.TabIndex = 7;
-            label7.Text = "Maximize - ctrl+alt+K";
+            label7.Text = "Normal - ctrl+alt+J";
             // 
             // label6
             // 
@@ -109,7 +111,7 @@
             label6.Name = "label6";
             label6.Size = new Size(134, 17);
             label6.TabIndex = 6;
-            label6.Text = "Right Half - ctrl+alt+L\r\n";
+            label6.Text = "Right Half - ctrl+alt+L";
             // 
             // label5
             // 
@@ -118,7 +120,7 @@
             label5.Name = "label5";
             label5.Size = new Size(128, 17);
             label5.TabIndex = 5;
-            label5.Text = "Left Half - ctrl+alt+H\r\n";
+            label5.Text = "Left Half - ctrl+alt+H";
             // 
             // label4
             // 
@@ -154,7 +156,7 @@
             label1.Name = "label1";
             label1.Size = new Size(163, 17);
             label1.TabIndex = 1;
-            label1.Text = "Top Left - ctrl+windows+H\r\n";
+            label1.Text = "Top Left - ctrl+windows+H";
             // 
             // helpText
             // 
@@ -170,6 +172,15 @@
             notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
             notifyIcon1.Text = "Rectangle";
             notifyIcon1.Visible = true;
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new Point(6, 175);
+            label11.Name = "label11";
+            label11.Size = new Size(134, 17);
+            label11.TabIndex = 9;
+            label11.Text = "Maximize - ctrl+alt+K";
             // 
             // Settings
             // 
@@ -202,5 +213,6 @@
         private Label label9;
         private Label label10;
         private NotifyIcon notifyIcon1;
+        private Label label11;
     }
 }

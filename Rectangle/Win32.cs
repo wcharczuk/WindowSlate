@@ -54,6 +54,27 @@ namespace Rectangle
         DWMWA_LAST
     }
 
+    public enum ShowWindowCommands : int
+    {
+        Hide = 0,
+        Normal = 1,
+        Minimized = 2,
+        Maximized = 3,
+    }
+
+
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct WINDOWPLACEMENT
+    {
+        public int length;
+        public int flags;
+        public ShowWindowCommands showCmd;
+        public System.Drawing.Point ptMinPosition;
+        public System.Drawing.Point ptMaxPosition;
+        public System.Drawing.Rectangle rcNormalPosition;
+    }
+
     static class Win32Util
     {
         [DllImport("user32.dll")]
@@ -129,6 +150,17 @@ namespace Rectangle
             Win32.DwmGetWindowAttribute(hWnd, (int)DwmWindowAttribute.DWMWA_EXTENDED_FRAME_BOUNDS, out rect, size);
             return rect;
         }
+
+        public static WINDOWPLACEMENT GetWindowPlacement(IntPtr hWnd)
+        {
+            WINDOWPLACEMENT placement = new WINDOWPLACEMENT();
+            placement.length = Marshal.SizeOf(placement);
+            if (!Win32.GetWindowPlacement(hWnd, ref placement))
+            {
+                throw new Exception($"Could not get window placement for window with pointer: {hWnd}");
+            }
+            return placement;
+        }
     }
 
     static class Win32
@@ -167,5 +199,13 @@ namespace Rectangle
 
         [DllImport("user32.dll")]
         public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
     }
 }

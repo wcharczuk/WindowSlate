@@ -88,6 +88,10 @@ namespace Rectangle
                     {
                         this.BottomLeft();
                     }
+                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
+                    {
+                        this.UnMaximize();
+                    }
                     break;
                 case Keys.K:
                     if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
@@ -98,11 +102,15 @@ namespace Rectangle
                     {
                         this.Maximize();
                     }
+                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt))
+                    {
+                        this.FullScreen();
+                    }
                     break;
             }
         }
 
-        private void Maximize()
+        private void FullScreen()
         {
             var window = Win32Util.GetForegroundWindow();
             var monitor = Win32Util.GetMonitorInfo(window);
@@ -120,9 +128,22 @@ namespace Rectangle
             });
         }
 
+        private void Maximize()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Maximized);
+        }
+
+        private void UnMaximize()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+        }
+
         private void HalfLeft()
         {
             var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
 
@@ -161,6 +182,7 @@ namespace Rectangle
         private void HalfRight()
         {
             var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
 
@@ -201,6 +223,7 @@ namespace Rectangle
         private void TopLeft()
         {
             var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
@@ -218,6 +241,7 @@ namespace Rectangle
         private void TopRight()
         {
             var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
@@ -236,6 +260,7 @@ namespace Rectangle
         private void BottomLeft()
         {
             var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
             var monitorRect = monitor.rcMonitor;
@@ -257,6 +282,7 @@ namespace Rectangle
         private void BottomRight()
         {
             var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRect(window);
 
@@ -280,6 +306,7 @@ namespace Rectangle
         private void PreviousDisplay()
         {
             var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var windowRect = Win32Util.GetWindowRect(window);
 
             var windowWidth = windowRect.Right - windowRect.Left;
@@ -303,6 +330,7 @@ namespace Rectangle
         private void NextDisplay()
         {
             var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var windowRect = Win32Util.GetWindowRect(window);
 
             var windowWidth = windowRect.Right - windowRect.Left;
@@ -320,11 +348,34 @@ namespace Rectangle
             });
         }
 
+        private void SetWindowMaximizedState(IntPtr hWnd, ShowWindowCommands state)
+        {
+            var windowPos = Win32Util.GetWindowPlacement(hWnd);
+            switch (state)
+            {
+                case ShowWindowCommands.Normal:
+                    if (windowPos.showCmd == state)
+                    {
+                        return;
+                    }
+                    windowPos.showCmd = state;
+                    Win32.SetWindowPlacement(hWnd, ref windowPos);
+                    break;
+                case ShowWindowCommands.Maximized:
+                    if (windowPos.showCmd == state)
+                    {
+                        return;
+                    }
+                    windowPos.showCmd = state;
+                    Win32.SetWindowPlacement(hWnd, ref windowPos);
+                    break;
+            }
+        }
+
         private bool IsPrimary()
         {
             var window = Win32Util.GetForegroundWindow();
             var monitor = Win32Util.GetMonitorInfo(window);
-
             return monitor.dwFlags == 0x1;
         }
 
