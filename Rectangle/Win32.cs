@@ -33,6 +33,27 @@ namespace Rectangle
         public char[] szDevice = new char[32];
     }
 
+    [Flags]
+    public enum DwmWindowAttribute : uint
+    {
+        DWMWA_NCRENDERING_ENABLED = 1,
+        DWMWA_NCRENDERING_POLICY,
+        DWMWA_TRANSITIONS_FORCEDISABLED,
+        DWMWA_ALLOW_NCPAINT,
+        DWMWA_CAPTION_BUTTON_BOUNDS,
+        DWMWA_NONCLIENT_RTL_LAYOUT,
+        DWMWA_FORCE_ICONIC_REPRESENTATION,
+        DWMWA_FLIP3D_POLICY,
+        DWMWA_EXTENDED_FRAME_BOUNDS,
+        DWMWA_HAS_ICONIC_BITMAP,
+        DWMWA_DISALLOW_PEEK,
+        DWMWA_EXCLUDED_FROM_PEEK,
+        DWMWA_CLOAK,
+        DWMWA_CLOAKED,
+        DWMWA_FREEZE_REPRESENTATION,
+        DWMWA_LAST
+    }
+
     static class Win32Util
     {
         [DllImport("user32.dll")]
@@ -60,9 +81,28 @@ namespace Rectangle
             return rct;
         }
 
+        /// <summary>
+        /// Moves a window to a given target rect factoring the shadow in the final dimensions.
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <param name="rct"></param>
+        /// <exception cref="Exception"></exception>
         public static void MoveWindow(IntPtr hWnd, RECT rct)
         {
-            if (!Win32.MoveWindow(hWnd, rct.Left, rct.Top, rct.Right - rct.Left, rct.Bottom - rct.Top, true))
+            var outerRect = Win32Util.GetWindowRect(hWnd);
+            var innerRect = Win32Util.GetWindowRectInner(hWnd);
+
+            var shadowLeft = Math.Abs(outerRect.Left - innerRect.Left);
+            var shadowRight = Math.Abs(outerRect.Right - innerRect.Right);
+            var shadowBottom = Math.Abs(outerRect.Bottom - innerRect.Bottom);
+            var shadowTop = Math.Abs(outerRect.Top - innerRect.Top);
+
+            var left = rct.Left - shadowLeft; // use shadow as margin
+            var top = rct.Top - shadowTop; // use shadow as margin
+            var width = (rct.Right - rct.Left) + (shadowLeft + shadowRight);
+            var height = rct.Bottom - rct.Top + (shadowTop + shadowBottom);
+
+            if (!Win32.MoveWindow(hWnd, left, top, width, height, true))
             {
                 throw new Exception($"Could not move window rect for window with pointer: {hWnd}");
             }
@@ -81,10 +121,21 @@ namespace Rectangle
             var taskbar = Win32.FindWindow("Shell_traywnd", "");
             return Win32Util.GetWindowRect(taskbar);
         }
+
+        public static RECT GetWindowRectInner(IntPtr hWnd)
+        {
+            RECT rect;
+            int size = Marshal.SizeOf(typeof(RECT));
+            Win32.DwmGetWindowAttribute(hWnd, (int)DwmWindowAttribute.DWMWA_EXTENDED_FRAME_BOUNDS, out rect, size);
+            return rect;
+        }
     }
 
     static class Win32
     {
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out RECT pvAttribute, int cbAttribute);
+
         [DllImport("user32.dll")]
         public static extern IntPtr GetForegroundWindow();
 
@@ -96,8 +147,7 @@ namespace Rectangle
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetWindowText(IntPtr hWnd, StringBuilder lpString,
-            int nMaxCount);
+        public static extern bool GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -109,14 +159,12 @@ namespace Rectangle
         [DllImport("user32.dll")]
         public static extern IntPtr MonitorFromWindow(IntPtr hWnd, MonitorFlag flag);
 
-        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern bool GetMonitorInfo(IntPtr hmonitor, [In, Out] MONITORINFOEX info);
 
-        // Registers a hot key with Windows.
         [DllImport("user32.dll")]
         public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
-        // Unregisters the hot key with Windows.
         [DllImport("user32.dll")]
         public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
     }

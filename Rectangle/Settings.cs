@@ -31,6 +31,24 @@ namespace Rectangle
             HotKeyManager.RegisterHotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt);
 
             HotKeyManager.HotKeyPressed += HotKeyManager_HotKeyPressed;
+
+            this.Resize += Settings_Resize;
+            this.notifyIcon1.MouseClick += NotifyIcon1_Click;
+            this.notifyIcon1.MouseDoubleClick += NotifyIcon1_Click;
+        }
+
+        private void Settings_Resize(object? sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Hide();
+            }
+        }
+
+        private void NotifyIcon1_Click(object? sender, MouseEventArgs e)
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
         }
 
         private void HotKeyManager_HotKeyPressed(object? sender, HotKeyEventArgs e)
@@ -106,7 +124,7 @@ namespace Rectangle
         {
             var window = Win32Util.GetForegroundWindow();
             var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
+            var windowRect = Win32Util.GetWindowRectInner(window);
 
             var windowWidth = windowRect.Right - windowRect.Left;
             var monitorRect = monitor.rcMonitor;
@@ -144,7 +162,7 @@ namespace Rectangle
         {
             var window = Win32Util.GetForegroundWindow();
             var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
+            var windowRect = Win32Util.GetWindowRectInner(window);
 
             var windowWidth = windowRect.Right - windowRect.Left;
             var monitorRect = monitor.rcMonitor;
