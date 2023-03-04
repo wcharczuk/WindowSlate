@@ -23,6 +23,7 @@ namespace Rectangle
             HotKeyManager.RegisterHotKey(Keys.K, KeyModifiers.Control | KeyModifiers.Windows);
 
             HotKeyManager.RegisterHotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Alt);
+            HotKeyManager.RegisterHotKey(Keys.I, KeyModifiers.Control | KeyModifiers.Alt);
             HotKeyManager.RegisterHotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Alt);
             HotKeyManager.RegisterHotKey(Keys.J, KeyModifiers.Control | KeyModifiers.Alt);
             HotKeyManager.RegisterHotKey(Keys.K, KeyModifiers.Control | KeyModifiers.Alt);
@@ -33,8 +34,10 @@ namespace Rectangle
             HotKeyManager.HotKeyPressed += HotKeyManager_HotKeyPressed;
 
             this.Resize += Settings_Resize;
-            this.notifyIcon1.MouseClick += NotifyIcon1_Click;
-            this.notifyIcon1.MouseDoubleClick += NotifyIcon1_Click;
+            this.trayIcon.MouseDoubleClick += NotifyIcon1_DoubleClick;
+
+            this.trayIconContextMenu.Items.Add("&Show", null, this.showToolstripItem_Click);
+            this.trayIconContextMenu.Items.Add("E&xit", null, this.exitToolstripItem_Click);
         }
 
         private void Settings_Resize(object? sender, EventArgs e)
@@ -45,10 +48,24 @@ namespace Rectangle
             }
         }
 
-        private void NotifyIcon1_Click(object? sender, MouseEventArgs e)
+        private void NotifyIcon1_DoubleClick(object? sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+            }
+        }
+
+        private void showToolstripItem_Click(object? sender, EventArgs e)
         {
             this.Show();
             this.WindowState = FormWindowState.Normal;
+        }
+        
+        private void exitToolstripItem_Click(object? sender, EventArgs e)
+        {
+            Application.Exit();
         }
 
         private void HotKeyManager_HotKeyPressed(object? sender, HotKeyEventArgs e)
@@ -67,6 +84,12 @@ namespace Rectangle
                     else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt))
                     {
                         this.PreviousDisplay();
+                    }
+                    break;
+                case Keys.I:
+                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
+                    {
+                        this.MiddleTwoThirds();
                     }
                     break;
                 case Keys.L:
@@ -90,7 +113,7 @@ namespace Rectangle
                     }
                     else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
                     {
-                        this.UnMaximize();
+                        this.Unmaximize();
                     }
                     break;
                 case Keys.K:
@@ -133,8 +156,7 @@ namespace Rectangle
             var window = Win32Util.GetForegroundWindow();
             this.SetWindowMaximizedState(window, ShowWindowCommands.Maximized);
         }
-
-        private void UnMaximize()
+        private void Unmaximize()
         {
             var window = Win32Util.GetForegroundWindow();
             this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
@@ -153,26 +175,27 @@ namespace Rectangle
             var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
             var monitorWidth = monitorRect.Right - monitorRect.Left;
 
-            var half = monitorWidth >> 1;
-            var third = monitorWidth / 3;
-            var twoThird = (monitorWidth / 3) << 1;
+            var half = monitorRect.Left + (monitorWidth >> 1);
+            var third = monitorRect.Left + (monitorWidth / 3);
+            var twoThird = monitorRect.Left + ((monitorWidth / 3) << 1);
 
-            var newWidth = half; // default is 1/2
+            var newCorners = new List<Int32>() {
+                half,
+                twoThird,
+                third,
+            };
             var newBottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom;
-
-            if (windowRect.Top == monitorRect.Top && windowRect.Bottom == newBottom)
+            var newRight = half;
+            if (
+                windowRect.Top == monitorRect.Top &&
+                windowRect.Bottom == newBottom &&
+                newCorners.Any(_ => _ == windowRect.Right)
+            )
             {
-                if (windowWidth == third)
+                var currentIndex = newCorners.IndexOf(windowRect.Right);
+                if (currentIndex >= 0)
                 {
-                    newWidth = half;
-                }
-                else if (windowWidth == half)
-                {
-                    newWidth = twoThird;
-                }
-                else if (windowWidth == twoThird)
-                {
-                    newWidth = third;
+                    newRight = newCorners[(currentIndex + 1) % newCorners.Count];
                 }
             }
 
@@ -180,7 +203,7 @@ namespace Rectangle
             {
                 Left = monitorRect.Left,
                 Top = monitorRect.Top,
-                Right = monitorRect.Left + newWidth,
+                Right = newRight,
                 Bottom = newBottom,
             });
         }
@@ -198,34 +221,84 @@ namespace Rectangle
 
             var monitorWidth = monitorRect.Right - monitorRect.Left;
 
-            var half = monitorWidth >> 1;
-            var third = monitorWidth / 3;
-            var twoThird = (monitorWidth / 3) << 1;
+            var half = monitorRect.Right - (monitorWidth >> 1);
+            var third = monitorRect.Right - (monitorWidth / 3);
+            var twoThird = monitorRect.Right - ((monitorWidth / 3) << 1);
 
-            var newWidth = half; // default is 1/2
+            var newCorners = new List<Int32>() {
+                half,
+                twoThird,
+                third,
+            };
             var newBottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom;
-
-            if (windowRect.Top == monitorRect.Top && windowRect.Bottom == newBottom)
+            var newLeft = half;
+            if (
+                windowRect.Top == monitorRect.Top &&
+                windowRect.Bottom == newBottom &&
+                newCorners.Any(_ => _ == windowRect.Left)
+            )
             {
-                if (windowWidth == third)
+                var currentIndex = newCorners.IndexOf(windowRect.Left);
+                if (currentIndex >= 0)
                 {
-                    newWidth = half;
-                }
-                else if (windowWidth == half)
-                {
-                    newWidth = twoThird;
-                }
-                else if (windowWidth == twoThird)
-                {
-                    newWidth = third;
+                    newLeft = newCorners[(currentIndex + 1) % newCorners.Count];
                 }
             }
 
             Win32Util.MoveWindow(window, windowRect with
             {
-                Left = monitorRect.Right - newWidth,
+                Left = newLeft,
                 Top = monitorRect.Top,
                 Right = monitorRect.Right,
+                Bottom = newBottom,
+            });
+        }
+        
+        private void MiddleTwoThirds()
+        {
+            var window = Win32Util.GetForegroundWindow();
+            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            var monitor = Win32Util.GetMonitorInfo(window);
+            var windowRect = Win32Util.GetWindowRectInner(window);
+
+            var windowWidth = windowRect.Right - windowRect.Left;
+
+            var monitorRect = monitor.rcMonitor;
+            var taskbarRect = Win32Util.GetTaskBarRect();
+            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
+
+            var monitorWidth = monitorRect.Right - monitorRect.Left;
+
+            var half = monitorWidth >> 1;
+            var third = monitorWidth / 3;
+            var twoThird = third << 1;
+
+            var newWidth = half;
+            if (windowWidth == half)
+            {
+                newWidth = twoThird;
+            } 
+            else if (windowWidth == third)
+            {
+                newWidth = half;
+            }
+            else if (windowWidth == twoThird)
+            {
+                newWidth = third;
+            }
+
+            var midpoint = monitorRect.Left + monitorWidth >> 1;
+
+            var newLeft = midpoint - (newWidth>>1);
+            var newRight = midpoint + (newWidth >> 1);
+
+            var newBottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom;
+
+            Win32Util.MoveWindow(window, windowRect with
+            {
+                Left = newLeft,
+                Top = monitorRect.Top,
+                Right = newRight,
                 Bottom = newBottom,
             });
         }
@@ -235,17 +308,42 @@ namespace Rectangle
             var window = Win32Util.GetForegroundWindow();
             this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
+            var windowRect = Win32Util.GetWindowRectInner(window);
+            var windowWidth = windowRect.Right - windowRect.Left;
             var monitorRect = monitor.rcMonitor;
             var monitorWidth = monitorRect.Right - monitorRect.Left;
             var monitorHeight = monitorRect.Bottom - monitorRect.Top;
+
+            var half = monitorRect.Left + (monitorWidth >> 1);
+            var third = monitorRect.Left + (monitorWidth / 3);
+            var twoThird = monitorRect.Left + ((monitorWidth / 3) << 1);
+
+            var newCorners = new List<Int32>() {
+                half,
+                twoThird,
+                third,
+            };
+            var newBottom = monitorRect.Top + (monitorHeight >> 1);
+            var newRight = half;
+            if (
+                windowRect.Top == monitorRect.Top &&
+                windowRect.Bottom == newBottom &&
+                newCorners.Any(_ => _ == windowRect.Right)
+            )
+            {
+                var currentIndex = newCorners.IndexOf(windowRect.Right);
+                if (currentIndex >= 0)
+                {
+                    newRight = newCorners[(currentIndex + 1) % newCorners.Count];
+                }
+            }
 
             Win32Util.MoveWindow(window, windowRect with
             {
                 Left = monitorRect.Left,
                 Top = monitorRect.Top,
-                Right = monitorRect.Left + (monitorWidth >> 1),
-                Bottom = monitorRect.Top + (monitorHeight >> 1)
+                Right = newRight,
+                Bottom = newBottom,
             });
         }
         private void TopRight()
@@ -253,17 +351,43 @@ namespace Rectangle
             var window = Win32Util.GetForegroundWindow();
             this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
+            var windowRect = Win32Util.GetWindowRectInner(window);
+            var windowWidth = windowRect.Right - windowRect.Left;
             var monitorRect = monitor.rcMonitor;
             var monitorWidth = monitorRect.Right - monitorRect.Left;
             var monitorHeight = monitorRect.Bottom - monitorRect.Top;
 
+            var half = monitorRect.Right - (monitorWidth >> 1);
+            var third = monitorRect.Right - (monitorWidth / 3);
+            var twoThird = monitorRect.Right - ((monitorWidth / 3) << 1);
+
+            var newCorners = new List<Int32>() {
+                half,
+                twoThird,
+                third,
+            };
+
+            var newBottom = monitorRect.Top + (monitorHeight >> 1);
+            var newLeft = half;
+            if (
+                windowRect.Top == monitorRect.Top &&
+                windowRect.Bottom == newBottom &&
+                newCorners.Any(_ => _ == windowRect.Left)
+            )
+            {
+                var currentIndex = newCorners.IndexOf(windowRect.Left);
+                if (currentIndex >= 0)
+                {
+                    newLeft = newCorners[(currentIndex + 1) % newCorners.Count];
+                }
+            }
+
             Win32Util.MoveWindow(window, windowRect with
             {
-                Left = monitorRect.Left + (monitorWidth >> 1),
+                Left = newLeft,
                 Top = monitorRect.Top,
                 Right = monitorRect.Right,
-                Bottom = monitorRect.Top + (monitorHeight >> 1),
+                Bottom = newBottom,
             });
         }
 
@@ -272,7 +396,7 @@ namespace Rectangle
             var window = Win32Util.GetForegroundWindow();
             this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
+            var windowRect = Win32Util.GetWindowRectInner(window);
             var monitorRect = monitor.rcMonitor;
 
             var taskbarRect = Win32Util.GetTaskBarRect();
@@ -281,12 +405,37 @@ namespace Rectangle
             var monitorWidth = monitorRect.Right - monitorRect.Left;
             var monitorHeight = monitorRect.Bottom - monitorRect.Top;
 
+            var half = monitorRect.Left + (monitorWidth >> 1);
+            var third = monitorRect.Left + (monitorWidth / 3);
+            var twoThird = monitorRect.Left + ((monitorWidth / 3) << 1);
+
+            var newCorners = new List<Int32>() {
+                half,
+                twoThird,
+                third,
+            };
+            var newTop = monitorRect.Top + (monitorHeight >> 1);
+            var newBottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom;
+            var newRight = half;
+            if (
+                windowRect.Top == newTop &&
+                windowRect.Bottom == newBottom &&
+                newCorners.Any(_ => _ == windowRect.Right)
+            )
+            {
+                var currentIndex = newCorners.IndexOf(windowRect.Right);
+                if (currentIndex >= 0)
+                {
+                    newRight = newCorners[(currentIndex + 1) % newCorners.Count];
+                }
+            }
+
             Win32Util.MoveWindow(window, windowRect with
             {
                 Left = monitorRect.Left,
-                Top = monitorRect.Top + (monitorHeight >> 1),
-                Right = monitorRect.Left + (monitorWidth >> 1),
-                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
+                Top = newTop,
+                Right = newRight,
+                Bottom = newBottom,
             });
         }
         private void BottomRight()
@@ -294,7 +443,7 @@ namespace Rectangle
             var window = Win32Util.GetForegroundWindow();
             this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
+            var windowRect = Win32Util.GetWindowRectInner(window);
 
             var monitorRect = monitor.rcMonitor;
 
@@ -304,12 +453,37 @@ namespace Rectangle
             var monitorWidth = monitorRect.Right - monitorRect.Left;
             var monitorHeight = monitorRect.Bottom - monitorRect.Top;
 
+            var half = monitorRect.Right - (monitorWidth >> 1);
+            var third = monitorRect.Right - (monitorWidth / 3);
+            var twoThird = monitorRect.Right - ((monitorWidth / 3) << 1);
+
+            var newCorners = new List<Int32>() {
+                half,
+                twoThird,
+                third,
+            };
+            var newTop = monitorRect.Top + (monitorHeight >> 1);
+            var newBottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom;
+            var newLeft = half;
+            if (
+                windowRect.Top == newTop &&
+                windowRect.Bottom == newBottom &&
+                newCorners.Any(_ => _ == windowRect.Left)
+            )
+            {
+                var currentIndex = newCorners.IndexOf(windowRect.Left);
+                if (currentIndex >= 0)
+                {
+                    newLeft = newCorners[(currentIndex + 1) % newCorners.Count];
+                }
+            }
+
             Win32Util.MoveWindow(window, windowRect with
             {
-                Left = monitorRect.Left + (monitorWidth >> 1),
-                Top = monitorRect.Top + (monitorHeight >> 1),
+                Left = newLeft,
+                Top = newTop,
                 Right = monitorRect.Right,
-                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
+                Bottom = newBottom,
             });
         }
 
