@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,33 +14,296 @@ namespace Rectangle
 {
     public partial class Settings : Form
     {
+        HotKeyInput inputMaximize;
+        HotKeyInput inputUnmaximize;
+        HotKeyInput inputHalfLeft;
+        HotKeyInput inputHalfRight;
+        HotKeyInput inputMiddleTwoThirds;
+        HotKeyInput inputTopLeft;
+        HotKeyInput inputTopRight;
+        HotKeyInput inputBottomLeft;
+        HotKeyInput inputBottomRight;
+        HotKeyInput inputPreviousDisplay;
+        HotKeyInput inputNextDisplay;
+
+        List<HotKeyInput> allHotKeyInputs;
+
         public Settings()
         {
+            this.KeyPreview = true;
+            this.inputMaximize = new HotKeyInput() { 
+                Description = "Maximize", 
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputUnmaximize = new HotKeyInput() { 
+                Description = "Unmaximize",
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputHalfLeft = new HotKeyInput() { 
+                Description = "Half-left", 
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputHalfRight = new HotKeyInput() { 
+                Description = "Half-right", 
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputMiddleTwoThirds = new HotKeyInput() { 
+                Description = "Middle",
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputTopLeft = new HotKeyInput() { 
+                Description = "Top left", 
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputTopRight = new HotKeyInput() { 
+                Description = "Top right",
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputBottomLeft = new HotKeyInput() { 
+                Description = "Bottom left",
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputBottomRight = new HotKeyInput() { 
+                Description = "Bottom right",
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputPreviousDisplay = new HotKeyInput() { 
+                Description = "Previous display",
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+            this.inputNextDisplay = new HotKeyInput() { 
+                Description = "Next display",
+                RegisterHotKeysHandler = this.RegisterHotKeys, 
+                UnregisterHotKeysHandler = this.UnregisterHotKeys,
+                SaveSettingsHandler = this.SaveSettings,
+            };
+
+            this.allHotKeyInputs = new()
+            {
+                inputMaximize,
+                inputUnmaximize,
+                inputHalfLeft,
+                inputHalfRight,
+                inputMiddleTwoThirds,
+                inputTopLeft,
+                inputTopRight,
+                inputBottomLeft,
+                inputBottomRight,
+                inputPreviousDisplay,
+                inputNextDisplay,
+            };
+
             InitializeComponent();
 
-            HotKeyManager.RegisterHotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Windows);
-            HotKeyManager.RegisterHotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Windows);
-            HotKeyManager.RegisterHotKey(Keys.J, KeyModifiers.Control | KeyModifiers.Windows);
-            HotKeyManager.RegisterHotKey(Keys.K, KeyModifiers.Control | KeyModifiers.Windows);
+            this.KeyDown += Settings_KeyDown;
 
-            HotKeyManager.RegisterHotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Alt);
-            HotKeyManager.RegisterHotKey(Keys.I, KeyModifiers.Control | KeyModifiers.Alt);
-            HotKeyManager.RegisterHotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Alt);
-            HotKeyManager.RegisterHotKey(Keys.J, KeyModifiers.Control | KeyModifiers.Alt);
-            HotKeyManager.RegisterHotKey(Keys.K, KeyModifiers.Control | KeyModifiers.Alt);
+            this.inputMaximize.HotKeyHandler = this.Maximize;
+            this.inputUnmaximize.HotKeyHandler = this.Unmaximize;
+            this.inputHalfLeft.HotKeyHandler = this.HalfLeft;
+            this.inputHalfRight.HotKeyHandler = this.HalfRight;
+            this.inputMiddleTwoThirds.HotKeyHandler = this.MiddleTwoThirds;
+            this.inputTopLeft.HotKeyHandler = this.TopLeft;
+            this.inputTopRight.HotKeyHandler = this.TopRight;
+            this.inputBottomLeft.HotKeyHandler = this.BottomLeft;
+            this.inputBottomRight.HotKeyHandler = this.BottomRight;
+            this.inputPreviousDisplay.HotKeyHandler = this.PreviousDisplay;
+            this.inputNextDisplay.HotKeyHandler = this.NextDisplay;
 
-            HotKeyManager.RegisterHotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt);
-            HotKeyManager.RegisterHotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt);
+            var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Rectangle");
+            if (storedSettings == null)
+            {
+                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Rectangle");
+            }
+            try
+            {
+                var settingHalfLeft = storedSettings.GetValue("half-left");
+                if (settingHalfLeft != null)
+                {
+                    if ((string)settingHalfLeft != "")
+                    {
+                        this.inputHalfLeft.HotKey = new HotKey((string)settingHalfLeft);
+                    }
+                }
+                else
+                {
+                    this.inputHalfLeft.HotKey = new HotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Alt);
+                }
+
+                var settingTopLeft = storedSettings.GetValue("top-left");
+                if (settingTopLeft != null)
+                {
+                    if ((string)settingTopLeft != "")
+                    {
+                        this.inputTopLeft.HotKey = new HotKey((string)settingTopLeft);
+                    }
+                }
+                else
+                {
+                    this.inputTopLeft.HotKey = new HotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Windows);
+                }
+
+                var settingPreviousDisplay = storedSettings.GetValue("previous-display");
+                if (settingPreviousDisplay != null)
+                {
+                    if ((string)settingPreviousDisplay != "")
+                    {
+                        this.inputPreviousDisplay.HotKey = new HotKey((string)settingPreviousDisplay);
+                    }
+                }
+                else
+                {
+                    this.inputPreviousDisplay.HotKey = new HotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt);
+                }
+
+                var settingMiddleTwoThirds = storedSettings.GetValue("middle-two-thirds");
+                if (settingMiddleTwoThirds != null)
+                {
+                    if ((string)settingMiddleTwoThirds != "")
+                    {
+                        this.inputMiddleTwoThirds.HotKey = new HotKey((string)settingMiddleTwoThirds);
+                    }
+                }
+                else
+                {
+                    this.inputMiddleTwoThirds.HotKey = new HotKey(Keys.I, KeyModifiers.Control | KeyModifiers.Alt);
+                }
+
+                var settingBottomLeft = storedSettings.GetValue("bottom-left");
+                if (settingBottomLeft != null)
+                {
+                    if ((string)settingBottomLeft != "")
+                    {
+                        this.inputBottomLeft.HotKey = new HotKey((string)settingBottomLeft);
+                    }
+                }
+                else
+                {
+                    this.inputBottomLeft.HotKey = new HotKey(Keys.J, KeyModifiers.Control | KeyModifiers.Windows);
+                }
+
+                var settingUnmaximize = storedSettings.GetValue("unmaximize");
+                if (settingUnmaximize != null)
+                {
+                    if ((string)settingUnmaximize != "")
+                    {
+                        this.inputUnmaximize.HotKey = new HotKey((string)settingUnmaximize);
+                    }
+                }
+                else
+                {
+                    this.inputUnmaximize.HotKey = new HotKey(Keys.J, KeyModifiers.Control | KeyModifiers.Alt);
+                }
+
+                var settingBottomRight = storedSettings.GetValue("bottom-right");
+                if (settingBottomRight != null)
+                {
+                    if ((string)settingBottomRight != "")
+                    {
+                        this.inputBottomRight.HotKey = new HotKey((string)settingBottomRight);
+                    }
+                } 
+                else
+                {
+                    this.inputBottomRight.HotKey = new HotKey(Keys.K, KeyModifiers.Control | KeyModifiers.Windows);
+                }
+
+                var settingMaximize = storedSettings.GetValue("maximize");
+                if (settingMaximize != null)
+                {
+                    if ((string)settingMaximize != "")
+                    {
+                        this.inputMaximize.HotKey = new HotKey((string)settingMaximize);
+                    }
+                }
+                else
+                {
+                    this.inputMaximize.HotKey = new HotKey(Keys.K, KeyModifiers.Control | KeyModifiers.Alt);
+                }
+
+                var settingHalfRight = storedSettings.GetValue("half-right");
+                if (settingHalfRight != null)
+                {
+                    if ((string)settingHalfRight != "")
+                    {
+                        this.inputHalfRight.HotKey = new HotKey((string)settingHalfRight);
+                    }
+                }
+                else
+                {
+                    this.inputHalfRight.HotKey = new HotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Alt);
+                }
+
+                var settingTopRight = storedSettings.GetValue("top-right");
+                if (settingTopRight != null)
+                {
+                    if ((string)settingTopRight != "")
+                    {
+                        this.inputTopRight.HotKey = new HotKey((string)settingTopRight);
+                    }
+                }
+                else
+                {
+                    this.inputTopRight.HotKey = new HotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Windows);
+                }
+
+                var settingNextDisplay = storedSettings.GetValue("next-display");
+                if (settingNextDisplay != null)
+                {
+                    if ((string)settingNextDisplay != "")
+                    {
+                        this.inputNextDisplay.HotKey = new HotKey((string)settingNextDisplay);
+                    }
+                }
+                else
+                {
+                    this.inputNextDisplay.HotKey = new HotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt);
+                }
+            } finally
+            {
+                storedSettings.Close();
+            }
 
             HotKeyManager.HotKeyPressed += HotKeyManager_HotKeyPressed;
 
             this.Resize += Settings_Resize;
-            this.trayIcon.MouseDoubleClick += NotifyIcon1_DoubleClick;
+            this.trayIcon.MouseDoubleClick += trayIcon_DoubleClick;
 
             this.trayIconContextMenu.Items.Add("&Show", null, this.showToolstripItem_Click);
             this.trayIconContextMenu.Items.Add("E&xit", null, this.exitToolstripItem_Click);
         }
 
+        private void Settings_KeyDown(object? sender, KeyEventArgs e)
+        {
+            foreach (var input in allHotKeyInputs)
+            {
+                if (input.IsCapturing)
+                {
+                    input.CaptureKeyDown(sender, e);
+                }
+            }
+        }
+
+        #region Event Handlers
         private void Settings_Resize(object? sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Minimized)
@@ -48,7 +312,7 @@ namespace Rectangle
             }
         }
 
-        private void NotifyIcon1_DoubleClick(object? sender, MouseEventArgs e)
+        private void trayIcon_DoubleClick(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -70,87 +334,72 @@ namespace Rectangle
 
         private void HotKeyManager_HotKeyPressed(object? sender, HotKeyEventArgs e)
         {
-            switch (e.Key)
+            try
             {
-                case Keys.H:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
+                foreach (var input in this.allHotKeyInputs)
+                {
+                    if (input.HotKey == null) { continue; }
+
+                    if (e.Key == input.HotKey.Key)
                     {
-                        this.TopLeft();
+                        if (e.Modifiers == input.HotKey.KeyModifiers)
+                        {
+                            if (input.HotKeyHandler != null)
+                            {
+                                input.HotKeyHandler();
+                                return;
+                            }
+                        }
                     }
-                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
-                    {
-                        this.HalfLeft();
-                    }
-                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt))
-                    {
-                        this.PreviousDisplay();
-                    }
-                    break;
-                case Keys.I:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
-                    {
-                        this.MiddleTwoThirds();
-                    }
-                    break;
-                case Keys.L:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
-                    {
-                        this.TopRight();
-                    }
-                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
-                    {
-                        this.HalfRight();
-                    }
-                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt))
-                    {
-                        this.NextDisplay();
-                    }
-                    break;
-                case Keys.J:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
-                    {
-                        this.BottomLeft();
-                    }
-                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
-                    {
-                        this.Unmaximize();
-                    }
-                    break;
-                case Keys.K:
-                    if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Windows))
-                    {
-                        this.BottomRight();
-                    }
-                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Alt))
-                    {
-                        this.Maximize();
-                    }
-                    else if (e.Modifiers == (KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt))
-                    {
-                        this.FullScreen();
-                    }
-                    break;
+                }
+            }
+            catch { } // not great!
+        }
+        #endregion
+
+        public void RegisterHotKeys()
+        {
+            foreach(var input in this.allHotKeyInputs)
+            {
+                input.Register();
+            }
+        }
+        public void SaveSettings()
+        {
+            var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Rectangle", true);
+            if (storedSettings == null)
+            {
+                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Rectangle", true);
+            }
+            try
+            {
+                storedSettings.SetValue("half-left", inputHalfLeft.HotKey != null ? inputHalfLeft.HotKey.ToString() : "");
+                storedSettings.SetValue("top-left", inputTopLeft.HotKey != null ? inputTopLeft.HotKey.ToString() : "");
+                storedSettings.SetValue("previous-display", inputPreviousDisplay.HotKey != null ? inputPreviousDisplay.HotKey.ToString() : "");
+                storedSettings.SetValue("middle-two-thirds", inputMiddleTwoThirds.HotKey != null ? inputMiddleTwoThirds.HotKey.ToString() : "");
+                storedSettings.SetValue("bottom-left", inputBottomLeft.HotKey != null ? inputBottomLeft.HotKey.ToString() : "");
+                storedSettings.SetValue("unmaximize", inputUnmaximize.HotKey != null ? inputUnmaximize.HotKey.ToString() : "");
+                storedSettings.SetValue("bottom-right", inputBottomRight.HotKey != null ? inputBottomRight.HotKey.ToString() : "");
+                storedSettings.SetValue("maximize", inputMaximize.HotKey != null ? inputMaximize.HotKey.ToString() : "");
+                storedSettings.SetValue("maximize", inputMaximize.HotKey != null ? inputMaximize.HotKey.ToString() : "");
+                storedSettings.SetValue("half-right", inputHalfRight.HotKey != null ? inputHalfRight.HotKey.ToString() : "");
+                storedSettings.SetValue("top-right", inputTopRight.HotKey != null ? inputTopRight.HotKey.ToString() : "");
+                storedSettings.SetValue("next-display", inputNextDisplay.HotKey != null ? inputNextDisplay.HotKey.ToString() : "");
+            }
+            finally
+            {
+                storedSettings.Close();
+            }
+        }
+        public void UnregisterHotKeys()
+        {
+            foreach(var input in this.allHotKeyInputs)
+            {
+                input.Unregister();
             }
         }
 
-        private void FullScreen()
-        {
-            var window = Win32Util.GetForegroundWindow();
-            var monitor = Win32Util.GetMonitorInfo(window);
-            var windowRect = Win32Util.GetWindowRect(window);
-            var monitorRect = monitor.rcMonitor;
-            var taskbarRect = Win32Util.GetTaskBarRect();
-            var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
-
-            Win32Util.MoveWindow(window, windowRect with
-            {
-                Left = monitorRect.Left,
-                Top = monitorRect.Top,
-                Right = monitorRect.Right,
-                Bottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom,
-            });
-        }
-
+        #region Movement Handlers
         private void Maximize()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -161,7 +410,6 @@ namespace Rectangle
             var window = Win32Util.GetForegroundWindow();
             this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
         }
-
         private void HalfLeft()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -253,7 +501,6 @@ namespace Rectangle
                 Bottom = newBottom,
             });
         }
-        
         private void MiddleTwoThirds()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -267,7 +514,7 @@ namespace Rectangle
             var taskbarRect = Win32Util.GetTaskBarRect();
             var taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
 
-            var monitorWidth = monitorRect.Right - monitorRect.Left;
+            var monitorWidth = Math.Abs(monitorRect.Right - monitorRect.Left);
 
             var half = monitorWidth >> 1;
             var third = monitorWidth / 3;
@@ -287,9 +534,9 @@ namespace Rectangle
                 newWidth = third;
             }
 
-            var midpoint = monitorRect.Left + monitorWidth >> 1;
+            var midpoint = monitorRect.Left + (monitorWidth >> 1);
 
-            var newLeft = midpoint - (newWidth>>1);
+            var newLeft = midpoint - (newWidth >> 1);
             var newRight = midpoint + (newWidth >> 1);
 
             var newBottom = this.IsPrimary() ? monitorRect.Bottom - taskbarHeight : monitorRect.Bottom;
@@ -302,7 +549,6 @@ namespace Rectangle
                 Bottom = newBottom,
             });
         }
-
         private void TopLeft()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -390,7 +636,6 @@ namespace Rectangle
                 Bottom = newBottom,
             });
         }
-
         private void BottomLeft()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -486,7 +731,6 @@ namespace Rectangle
                 Bottom = newBottom,
             });
         }
-
         private void PreviousDisplay()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -531,7 +775,9 @@ namespace Rectangle
                 Bottom = nextScreen.Bounds.Y + windowHeight
             });
         }
+        #endregion
 
+        #region Helpers
         private void SetWindowMaximizedState(IntPtr hWnd, ShowWindowCommands state)
         {
             var windowPos = Win32Util.GetWindowPlacement(hWnd);
@@ -580,5 +826,6 @@ namespace Rectangle
             }
             throw new Exception($"Could not find index of monitor with device name {monitorDeviceNameClean}");
         }
+        #endregion
     }
 }

@@ -31,7 +31,6 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
             groupBox = new GroupBox();
-            helpText = new Label();
             trayIcon = new NotifyIcon(components);
             trayIconContextMenu = new ContextMenuStrip(components);
             groupBox.SuspendLayout();
@@ -39,22 +38,16 @@
             // 
             // groupBox1
             // 
-            groupBox.Controls.Add(helpText);
-            groupBox.Location = new Point(15, 15);
+            foreach (var input in allHotKeyInputs)
+            {
+                groupBox.Controls.Add(input);
+            }
+            groupBox.Location = new Point(10, 10);
             groupBox.Name = "groupBox";
-            groupBox.Size = new Size(425, 425);
+            groupBox.Size = new Size(380, 580);
             groupBox.TabIndex = 0;
             groupBox.TabStop = false;
-            groupBox.Text = "Settings && Help";
-            // 
-            // helpText
-            // 
-            helpText.AutoSize = true;
-            helpText.Location = new Point(6, 22);
-            helpText.Name = "helpText";
-            helpText.Size = new Size(390, 64);
-            helpText.TabIndex = 0;
-            helpText.Text = "In this section we'll go over the specific hotkeys and what they do:";
+            groupBox.Text = "Input Settings";
             // 
             // notifyIcon1
             // 
@@ -67,12 +60,26 @@
             // 
             trayIconContextMenu.Name = "notifyIconContextMenu";
             trayIconContextMenu.Size = new Size(64, 4);
+
+            // inputs
+            inputMaximize.Location = new Point(20, 20);
+            inputUnmaximize.Location = new Point(20, inputMaximize.Location.Y+inputMaximize.Height);
+            inputHalfLeft.Location = new Point(20, inputUnmaximize.Location.Y+inputUnmaximize.Height);
+            inputHalfRight.Location = new Point(20, inputHalfLeft.Location.Y+inputHalfLeft.Height);
+            inputMiddleTwoThirds.Location = new Point(20, inputHalfRight.Location.Y+inputHalfRight.Height);
+            inputTopLeft.Location = new Point(20, inputMiddleTwoThirds.Location.Y+inputMiddleTwoThirds.Height);
+            inputTopRight.Location = new Point(20, inputTopLeft.Location.Y+inputTopLeft.Height);
+            inputBottomLeft.Location = new Point(20, inputTopRight.Location.Y+inputTopRight.Height);
+            inputBottomRight.Location = new Point(20, inputBottomLeft.Location.Y+inputBottomLeft.Height);
+            inputPreviousDisplay.Location = new Point(20, inputBottomRight.Location.Y+inputBottomRight.Height);
+            inputNextDisplay.Location = new Point(20, inputPreviousDisplay.Location.Y+inputPreviousDisplay.Height);
+
             // 
             // Settings
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(450, 450);
+            ClientSize = new Size(400, 600);
             Controls.Add(groupBox);
             Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
             FormBorderStyle = FormBorderStyle.Fixed3D;
@@ -87,7 +94,6 @@
         #endregion
 
         private GroupBox groupBox;
-        private Label helpText;
         private NotifyIcon trayIcon;
         private ContextMenuStrip trayIconContextMenu;
     }
