@@ -35,14 +35,7 @@
             trayIconContextMenu = new ContextMenuStrip(components);
             groupBox.SuspendLayout();
             SuspendLayout();
-            // 
-            // groupBox1
-            // 
-            foreach (var input in allHotKeyInputs)
-            {
-                groupBox.Controls.Add(input);
-            }
-            groupBox.Location = new Point(10, 10);
+                        groupBox.Location = new Point(10, 10);
             groupBox.Name = "groupBox";
             groupBox.Size = new Size(380, 580);
             groupBox.TabIndex = 0;
@@ -61,19 +54,7 @@
             trayIconContextMenu.Name = "notifyIconContextMenu";
             trayIconContextMenu.Size = new Size(64, 4);
 
-            // inputs
-            inputMaximize.Location = new Point(20, 20);
-            inputUnmaximize.Location = new Point(20, inputMaximize.Location.Y+inputMaximize.Height);
-            inputHalfLeft.Location = new Point(20, inputUnmaximize.Location.Y+inputUnmaximize.Height);
-            inputHalfRight.Location = new Point(20, inputHalfLeft.Location.Y+inputHalfLeft.Height);
-            inputMiddleTwoThirds.Location = new Point(20, inputHalfRight.Location.Y+inputHalfRight.Height);
-            inputTopLeft.Location = new Point(20, inputMiddleTwoThirds.Location.Y+inputMiddleTwoThirds.Height);
-            inputTopRight.Location = new Point(20, inputTopLeft.Location.Y+inputTopLeft.Height);
-            inputBottomLeft.Location = new Point(20, inputTopRight.Location.Y+inputTopRight.Height);
-            inputBottomRight.Location = new Point(20, inputBottomLeft.Location.Y+inputBottomLeft.Height);
-            inputPreviousDisplay.Location = new Point(20, inputBottomRight.Location.Y+inputBottomRight.Height);
-            inputNextDisplay.Location = new Point(20, inputPreviousDisplay.Location.Y+inputPreviousDisplay.Height);
-
+           
             // 
             // Settings
             // 

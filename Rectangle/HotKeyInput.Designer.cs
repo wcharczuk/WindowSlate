@@ -108,12 +108,14 @@
             setDone.Name = "setDone";
             setDone.Size = new Size(40, 25);
             setDone.TabIndex = 8;
+            setDone.BackColor = Color.Green;
+            setDone.ForeColor = Color.Green;
             setDoneTooltip.SetToolTip(setDone, "Finalize setting the hotkey for this motion");
-            setDone.UseVisualStyleBackColor = true;
+            setDone.UseVisualStyleBackColor = false;
             setDone.Visible = false;
             setDone.Click += setDone_Click;
             // 
-            // button1
+            // cancel 
             // 
             cancel.Image = (Image)resources.GetObject("button1.Image");
             cancel.Location = new Point(300, 14);
@@ -121,8 +123,10 @@
             cancel.Name = "cancel";
             cancel.Size = new Size(40, 25);
             cancel.TabIndex = 9;
+            cancel.BackColor = Color.Red;
+            cancel.ForeColor = Color.Red;
             cancelTooltip.SetToolTip(cancel, "Cancel setting the hotkey for this motion");
-            cancel.UseVisualStyleBackColor = true;
+            cancel.UseVisualStyleBackColor = false;
             cancel.Visible = false;
             cancel.Click += cancel_Click;
             // 

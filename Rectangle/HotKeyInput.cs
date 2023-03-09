@@ -31,11 +31,11 @@ namespace Rectangle
         }
 
         public int? HotKeyIndex { get; set; }
-        public Action? HotKeyHandler { get; set; }
 
         public Action? RegisterHotKeysHandler { get; set; }
         public Action? UnregisterHotKeysHandler { get; set; }
         public Action? SaveSettingsHandler { get; set; }
+
         public bool IsCapturing { get; set; }
 
         public string Description
