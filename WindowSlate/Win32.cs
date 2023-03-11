@@ -72,7 +72,7 @@ namespace WindowSlate
         public ShowWindowCommands showCmd;
         public System.Drawing.Point ptMinPosition;
         public System.Drawing.Point ptMaxPosition;
-        public System.Drawing.WindowSlate rcNormalPosition;
+        public System.Drawing.Rectangle rcNormalPosition;
     }
 
     static class Win32Util
