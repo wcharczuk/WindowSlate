@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-namespace Rectangle
+namespace WindowSlate
 {
     public class HotKeyManager
     {

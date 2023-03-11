@@ -1,4 +1,4 @@
-﻿namespace Rectangle
+﻿namespace WindowSlate
 {
     partial class Settings
     {
@@ -46,7 +46,7 @@
             // 
             trayIcon.ContextMenuStrip = trayIconContextMenu;
             trayIcon.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
-            trayIcon.Text = "Rectangle";
+            trayIcon.Text = "WindowSlate";
             trayIcon.Visible = true;
             // 
             // contextMenuStrip1
@@ -66,7 +66,7 @@
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
             Name = "Settings";
-            Text = "Rectangle Settings & Help";
+            Text = "WindowSlate Settings & Help";
             groupBox.ResumeLayout(false);
             groupBox.PerformLayout();
             ResumeLayout(false);

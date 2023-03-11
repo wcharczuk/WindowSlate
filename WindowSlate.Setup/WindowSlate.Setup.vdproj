@@ -3,7 +3,7 @@
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
-"ProjectName" = "8:Rectangle.Setup"
+"ProjectName" = "8:WindowSlate.Setup"
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
@@ -39,7 +39,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\Rectangle.Setup.msi"
+        "OutputFilename" = "8:Debug\\WindowSlate.Setup.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -56,6 +56,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -63,7 +71,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\Rectangle.msi"
+        "OutputFilename" = "8:Release\\WindowSlate.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -210,7 +218,7 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:Rectangle"
+        "ProductName" = "8:WindowSlate"
         "ProductCode" = "8:{A7840822-CB7D-45B2-862E-75B3EE4A9827}"
         "PackageCode" = "8:{8A5F96AD-F903-4197-8948-4AB1A4DC99AD}"
         "UpgradeCode" = "8:{EDD89B61-CF30-4CB3-97B7-B6BB8AF43FDD}"
@@ -220,10 +228,10 @@
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
         "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:Inverse Technologies, inc."
+        "Manufacturer" = "8:WindowSlate"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:Rectangle.Setup"
+        "Title" = "8:WindowSlate.Setup"
         "Subject" = "8:"
         "ARPCONTACT" = "8:Will Charczuk"
         "Keywords" = "8:"
@@ -334,7 +342,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_0CE68FC30AB14C63B79310726F0E068F"
             {
-            "Name" = "8:Rectangle"
+            "Name" = "8:WindowSlate"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
@@ -747,7 +755,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_45F9D23E377E440E8C105C8CB16D08D6"
             {
-            "SourcePath" = "8:..\\Rectangle\\obj\\Release\\net6.0-windows\\Rectangle.dll"
+            "SourcePath" = "8:..\\WindowSlate\\obj\\Release\\net6.0-windows\\WindowSlate.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_22FB04F1E23A4B908139878F6D995FE2"
@@ -775,7 +783,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B57C3671D3524D3087E8A56FC07E059B"
             {
-            "SourcePath" = "8:..\\Rectangle\\obj\\Release\\net6.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\WindowSlate\\obj\\Release\\net6.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_22FB04F1E23A4B908139878F6D995FE2"

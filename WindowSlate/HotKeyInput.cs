@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Rectangle
+namespace WindowSlate
 {
     public partial class HotKeyInput : UserControl
     {

@@ -4,7 +4,7 @@ using System.Text;
 using System.Diagnostics.CodeAnalysis;
 
 
-namespace Rectangle
+namespace WindowSlate
 {
     internal static class Program
     {

@@ -1,6 +1,6 @@
 using System.Windows.Forms;
 
-namespace Rectangle.Test
+namespace WindowSlate.Test
 {
     [TestClass]
     public class HotKey_Test

@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Rectangle
+namespace WindowSlate
 {
     public struct HotKeyInfo
     {
@@ -110,10 +110,10 @@ namespace Rectangle
                 },
             };
 
-            var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Rectangle");
+            var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\WindowSlate");
             if (storedSettings == null)
             {
-                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Rectangle");
+                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WindowSlate");
             }
             try
             {
@@ -237,10 +237,10 @@ namespace Rectangle
         }
         public void SaveSettings()
         {
-            var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Rectangle", true);
+            var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\WindowSlate", true);
             if (storedSettings == null)
             {
-                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\Rectangle", true);
+                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WindowSlate", true);
             }
             try
             {

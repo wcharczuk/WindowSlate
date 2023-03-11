@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rectangle\Rectangle.csproj" />
+    <ProjectReference Include="..\WindowSlate\WindowSlate.csproj" />
   </ItemGroup>
 
 </Project>

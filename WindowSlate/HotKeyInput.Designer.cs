@@ -1,4 +1,4 @@
-﻿namespace Rectangle
+﻿namespace WindowSlate
 {
     partial class HotKeyInput
     {

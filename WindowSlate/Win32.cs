@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Rectangle
+namespace WindowSlate
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT
@@ -72,7 +72,7 @@ namespace Rectangle
         public ShowWindowCommands showCmd;
         public System.Drawing.Point ptMinPosition;
         public System.Drawing.Point ptMaxPosition;
-        public System.Drawing.Rectangle rcNormalPosition;
+        public System.Drawing.WindowSlate rcNormalPosition;
     }
 
     static class Win32Util

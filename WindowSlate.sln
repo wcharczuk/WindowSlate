@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rectangle", "Rectangle\Rectangle.csproj", "{E705967C-B93C-48DB-ABEE-ECA12FE6CD73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowSlate", "WindowSlate\WindowSlate.csproj", "{E705967C-B93C-48DB-ABEE-ECA12FE6CD73}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rectangle.Test", "Rectangle.Test\Rectangle.Test.csproj", "{6A7FCBAF-91FE-41B2-960F-B634E1A18A17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowSlate.Test", "WindowSlate.Test\WindowSlate.Test.csproj", "{6A7FCBAF-91FE-41B2-960F-B634E1A18A17}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Rectangle.Setup", "Rectangle.Setup\Rectangle.Setup.vdproj", "{4F6BFD40-60C9-4F19-803C-D91EF3166A6A}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "WindowSlate.Setup", "WindowSlate.Setup\WindowSlate.Setup.vdproj", "{4F6BFD40-60C9-4F19-803C-D91EF3166A6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
