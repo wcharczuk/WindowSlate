@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,6 +34,8 @@ namespace WindowSlate
     public partial class Settings : Form
     {
         public List<HotKeyInfo> hotkeys;
+    
+        static string SETTINGS_KEY_START_MINIMIZED = "start-inimized";
 
         public Settings()
         {
@@ -153,6 +156,14 @@ namespace WindowSlate
                     runOnStartCheckbox.Checked = runOnStartSetting != null;
                 }
             }
+            using (storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\WindowSlate"))
+            {
+                if (storedSettings != null)
+                {
+                    var startMinimizedSetting = storedSettings.GetValue(SETTINGS_KEY_START_MINIMIZED);
+                    startMinimizedCheckbox.Checked = startMinimizedSetting != null;
+                }
+            }
 
             var inputY = 20;
             groupBox.SuspendLayout();
@@ -172,14 +183,20 @@ namespace WindowSlate
             this.trayIcon.MouseDoubleClick += trayIcon_DoubleClick;
             this.trayIconContextMenu.Items.Add("&Show", null, this.showToolstripItem_Click);
             this.trayIconContextMenu.Items.Add("E&xit", null, this.exitToolstripItem_Click);
+
+            if (startMinimizedCheckbox.Checked)
+            {
+                this.SelfMinimizeToTray();
+            }
         }
 
         #region Event Handlers
+
         private void Settings_Resize(object? sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Minimized)
             {
-                this.Hide();
+                this.SelfMinimizeToTray();
             }
         }
 
@@ -198,15 +215,13 @@ namespace WindowSlate
         {
             if (e.Button == MouseButtons.Left)
             {
-                this.Show();
-                this.WindowState = FormWindowState.Normal;
+                this.SelfShowFromTray();
             }
         }
 
         private void showToolstripItem_Click(object? sender, EventArgs e)
         {
-            this.Show();
-            this.WindowState = FormWindowState.Normal;
+            this.SelfShowFromTray();
         }
 
         private void exitToolstripItem_Click(object? sender, EventArgs e)
@@ -234,8 +249,8 @@ namespace WindowSlate
             }
             catch { } // not great!
         }
-
-        private void RunOnStartCheckbox_CheckedChanged(object sender, EventArgs e)
+       
+        private void runOnStartCheckbox_CheckedChanged(object sender, EventArgs e)
         {
             using (var runOnStart = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", /*writable*/ true))
             {
@@ -243,7 +258,16 @@ namespace WindowSlate
                 {
                     if (this.runOnStartCheckbox.Checked)
                     {
-                        runOnStart.SetValue("WindowSlate", System.Reflection.Assembly.GetExecutingAssembly().Location);
+                        var args = Environment.GetCommandLineArgs();
+                        if (args != null && args.Length > 0)
+                        {
+                            var exePath = args[0];
+                            if (exePath.EndsWith(".dll"))
+                            {
+                                exePath = TrimSuffix(exePath, ".dll") + ".exe";
+                            }
+                            runOnStart.SetValue("WindowSlate", exePath);
+                        }
                     }
                     else
                     {
@@ -252,6 +276,31 @@ namespace WindowSlate
                 }
             }
         }
+
+        private void startMinimizedCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\WindowSlate", true);
+            if (storedSettings == null)
+            {
+                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WindowSlate", true);
+            }
+            try
+            {
+                if(startMinimizedCheckbox.Checked)
+                {
+                    storedSettings.GetValue(SETTINGS_KEY_START_MINIMIZED, "true");
+                } 
+                else
+                {
+                    storedSettings.DeleteValue(SETTINGS_KEY_START_MINIMIZED);
+                }
+            }
+            finally
+            {
+                storedSettings.Close();
+            }
+        }
+
         #endregion
 
         #region Input Helpers
@@ -294,17 +343,17 @@ namespace WindowSlate
         private void Maximize()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Maximized);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Maximized);
         }
         private void Unmaximize()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
         }
         private void HalfLeft()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
 
@@ -349,7 +398,7 @@ namespace WindowSlate
         private void HalfRight()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
 
@@ -395,7 +444,7 @@ namespace WindowSlate
         private void MiddleTwoThirds()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
 
@@ -443,7 +492,7 @@ namespace WindowSlate
         private void TopLeft()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
             var windowWidth = windowRect.Right - windowRect.Left;
@@ -486,7 +535,7 @@ namespace WindowSlate
         private void TopRight()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
             var windowWidth = windowRect.Right - windowRect.Left;
@@ -530,7 +579,7 @@ namespace WindowSlate
         private void BottomLeft()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
             var monitorRect = monitor.rcMonitor;
@@ -577,7 +626,7 @@ namespace WindowSlate
         private void BottomRight()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var monitor = Win32Util.GetMonitorInfo(window);
             var windowRect = Win32Util.GetWindowRectInner(window);
 
@@ -625,7 +674,7 @@ namespace WindowSlate
         private void PreviousDisplay()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var windowRect = Win32Util.GetWindowRect(window);
 
             var windowWidth = windowRect.Right - windowRect.Left;
@@ -649,7 +698,7 @@ namespace WindowSlate
         private void NextDisplay()
         {
             var window = Win32Util.GetForegroundWindow();
-            this.SetWindowMaximizedState(window, ShowWindowCommands.Normal);
+            this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
             var windowRect = Win32Util.GetWindowRect(window);
 
             var windowWidth = windowRect.Right - windowRect.Left;
@@ -669,7 +718,20 @@ namespace WindowSlate
         #endregion
 
         #region Helpers
-        private void SetWindowMaximizedState(IntPtr hWnd, ShowWindowCommands state)
+
+        private void SelfMinimizeToTray()
+        {
+            this.Hide();
+            this.trayIcon.Visible = true;
+        }
+        private void SelfShowFromTray()
+        {
+            this.Show();
+            this.trayIcon.Visible = false;
+            this.WindowState = FormWindowState.Normal;
+        }
+
+        private void SetTargetWindowMaximizedState(IntPtr hWnd, ShowWindowCommands state)
         {
             var windowPos = Win32Util.GetWindowPlacement(hWnd);
             switch (state)
@@ -716,6 +778,18 @@ namespace WindowSlate
                 }
             }
             throw new Exception($"Could not find index of monitor with device name {monitorDeviceNameClean}");
+        }
+
+        private static string TrimSuffix(string str, string suffix)
+        {
+            if (str.EndsWith(suffix))
+            {
+                return str.Substring(0, str.Length - suffix.Length);
+            }
+            else
+            {
+                return str;
+            }
         }
         #endregion
     }

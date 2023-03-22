@@ -1,4 +1,6 @@
-﻿namespace WindowSlate
+﻿using WindowSlate.Properties;
+
+namespace WindowSlate
 {
     partial class Settings
     {
@@ -29,15 +31,18 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
             groupBox = new GroupBox();
             runOnStartCheckbox = new CheckBox();
             trayIcon = new NotifyIcon(components);
             trayIconContextMenu = new ContextMenuStrip(components);
+            startMinimizedCheckbox = new CheckBox();
             groupBox.SuspendLayout();
             SuspendLayout();
             // 
             // groupBox
             // 
+            groupBox.Controls.Add(startMinimizedCheckbox);
             groupBox.Controls.Add(runOnStartCheckbox);
             groupBox.Location = new Point(10, 10);
             groupBox.Name = "groupBox";
@@ -49,24 +54,36 @@
             // runOnStartCheckbox
             // 
             runOnStartCheckbox.AutoSize = true;
-            runOnStartCheckbox.Location = new Point(270, 573);
+            runOnStartCheckbox.Location = new Point(140, 573);
             runOnStartCheckbox.Name = "runOnStartCheckbox";
-            runOnStartCheckbox.Size = new Size(104, 21);
+            runOnStartCheckbox.Size = new Size(105, 20);
             runOnStartCheckbox.TabIndex = 1;
             runOnStartCheckbox.Text = "Run on start?";
             runOnStartCheckbox.UseVisualStyleBackColor = true;
-            runOnStartCheckbox.CheckedChanged += RunOnStartCheckbox_CheckedChanged;
+            runOnStartCheckbox.CheckedChanged += runOnStartCheckbox_CheckedChanged;
             // 
             // trayIcon
             // 
             trayIcon.ContextMenuStrip = trayIconContextMenu;
-            trayIcon.Text = "WindowSlate";
-            trayIcon.Visible = true;
-            // 
+            trayIcon.Text = "Window Slate";
+            trayIcon.Icon = (Icon)resources.GetObject("notifyIcon");
+            trayIcon.Visible = false;
+            //
             // trayIconContextMenu
             // 
             trayIconContextMenu.Name = "notifyIconContextMenu";
-            trayIconContextMenu.Size = new Size(61, 4);
+            trayIconContextMenu.Size = new Size(60, 5);
+            // 
+            // startMinimizedCheckbox
+            // 
+            startMinimizedCheckbox.AutoSize = true;
+            startMinimizedCheckbox.Location = new Point(250, 573);
+            startMinimizedCheckbox.Name = "startMinimizedCheckbox";
+            startMinimizedCheckbox.Size = new Size(125, 20);
+            startMinimizedCheckbox.TabIndex = 2;
+            startMinimizedCheckbox.Text = "Start Minimized?";
+            startMinimizedCheckbox.UseVisualStyleBackColor = true;
+            startMinimizedCheckbox.CheckedChanged += startMinimizedCheckbox_CheckedChanged;
             // 
             // Settings
             // 
@@ -90,5 +107,6 @@
         private NotifyIcon trayIcon;
         private ContextMenuStrip trayIconContextMenu;
         private CheckBox runOnStartCheckbox;
+        private CheckBox startMinimizedCheckbox;
     }
 }
