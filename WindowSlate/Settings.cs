@@ -142,13 +142,22 @@ namespace WindowSlate
             {
                 storedSettings.Close();
             }
-                       
+
             InitializeComponent();
+
+            using (var runOnStart = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"))
+            {
+                if (runOnStart != null)
+                {
+                    var runOnStartSetting = runOnStart.GetValue("WindowSlate");
+                    runOnStartCheckbox.Checked = runOnStartSetting != null;
+                }
+            }
 
             var inputY = 20;
             groupBox.SuspendLayout();
             this.SuspendLayout();
-            foreach(var hotkey in hotkeys)
+            foreach (var hotkey in hotkeys)
             {
                 groupBox.Controls.Add(hotkey.Input);
                 hotkey.Input.Location = new Point(20, inputY);
@@ -199,7 +208,7 @@ namespace WindowSlate
             this.Show();
             this.WindowState = FormWindowState.Normal;
         }
-        
+
         private void exitToolstripItem_Click(object? sender, EventArgs e)
         {
             Application.Exit();
@@ -225,12 +234,30 @@ namespace WindowSlate
             }
             catch { } // not great!
         }
+
+        private void RunOnStartCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            using (var runOnStart = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", /*writable*/ true))
+            {
+                if (runOnStart != null)
+                {
+                    if (this.runOnStartCheckbox.Checked)
+                    {
+                        runOnStart.SetValue("WindowSlate", System.Reflection.Assembly.GetExecutingAssembly().Location);
+                    }
+                    else
+                    {
+                        runOnStart.DeleteValue("WindowSlate");
+                    }
+                }
+            }
+        }
         #endregion
 
         #region Input Helpers
         public void RegisterHotKeys()
         {
-            foreach(var hotkey in this.hotkeys)
+            foreach (var hotkey in this.hotkeys)
             {
                 hotkey.Input.Register();
             }
@@ -244,7 +271,7 @@ namespace WindowSlate
             }
             try
             {
-                foreach(var hotkey in hotkeys)
+                foreach (var hotkey in hotkeys)
                 {
                     storedSettings.SetValue(hotkey.SettingsKey, hotkey.Input.HotKey != null ? hotkey.Input.HotKey.ToString() : "");
                 }
@@ -256,7 +283,7 @@ namespace WindowSlate
         }
         public void UnregisterHotKeys()
         {
-            foreach(var hotkey in this.hotkeys)
+            foreach (var hotkey in this.hotkeys)
             {
                 hotkey.Input.Unregister();
             }
@@ -388,7 +415,7 @@ namespace WindowSlate
             if (windowWidth == half)
             {
                 newWidth = twoThird;
-            } 
+            }
             else if (windowWidth == third)
             {
                 newWidth = half;
