@@ -60,7 +60,6 @@ namespace WindowSlate
             runOnStartCheckbox.TabIndex = 1;
             runOnStartCheckbox.Text = "Run on start?";
             runOnStartCheckbox.UseVisualStyleBackColor = true;
-            runOnStartCheckbox.CheckedChanged += runOnStartCheckbox_CheckedChanged;
             // 
             // trayIcon
             // 
@@ -83,7 +82,6 @@ namespace WindowSlate
             startMinimizedCheckbox.TabIndex = 2;
             startMinimizedCheckbox.Text = "Start Minimized?";
             startMinimizedCheckbox.UseVisualStyleBackColor = true;
-            startMinimizedCheckbox.CheckedChanged += startMinimizedCheckbox_CheckedChanged;
             // 
             // Settings
             // 

@@ -174,15 +174,19 @@ namespace WindowSlate
                 hotkey.Input.Location = new Point(20, inputY);
                 inputY += hotkey.Input.Height;
             }
+            this.trayIconContextMenu.Items.Add("&Show", null, this.showToolstripItem_Click);
+            this.trayIconContextMenu.Items.Add("E&xit", null, this.exitToolstripItem_Click);
+
             groupBox.ResumeLayout();
             this.ResumeLayout();
 
+            // register event handlers
             this.KeyDown += Settings_KeyDown;
             HotKeyManager.HotKeyPressed += HotKeyManager_HotKeyPressed;
             this.Resize += Settings_Resize;
             this.trayIcon.MouseDoubleClick += trayIcon_DoubleClick;
-            this.trayIconContextMenu.Items.Add("&Show", null, this.showToolstripItem_Click);
-            this.trayIconContextMenu.Items.Add("E&xit", null, this.exitToolstripItem_Click);
+            this.runOnStartCheckbox.CheckedChanged += runOnStartCheckbox_CheckedChanged;
+            this.startMinimizedCheckbox.CheckedChanged += startMinimizedCheckbox_CheckedChanged;
 
             if (startMinimizedCheckbox.Checked)
             {
@@ -250,7 +254,7 @@ namespace WindowSlate
             catch { } // not great!
         }
        
-        private void runOnStartCheckbox_CheckedChanged(object sender, EventArgs e)
+        private void runOnStartCheckbox_CheckedChanged(object? sender, EventArgs e)
         {
             using (var runOnStart = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", /*writable*/ true))
             {
@@ -277,7 +281,7 @@ namespace WindowSlate
             }
         }
 
-        private void startMinimizedCheckbox_CheckedChanged(object sender, EventArgs e)
+        private void startMinimizedCheckbox_CheckedChanged(object? sender, EventArgs e)
         {
             var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\WindowSlate", true);
             if (storedSettings == null)
@@ -288,7 +292,7 @@ namespace WindowSlate
             {
                 if(startMinimizedCheckbox.Checked)
                 {
-                    storedSettings.GetValue(SETTINGS_KEY_START_MINIMIZED, "true");
+                    storedSettings.SetValue(SETTINGS_KEY_START_MINIMIZED, "true");
                 } 
                 else
                 {
@@ -722,8 +726,10 @@ namespace WindowSlate
         private void SelfMinimizeToTray()
         {
             this.Hide();
+            this.WindowState = FormWindowState.Minimized;
             this.trayIcon.Visible = true;
         }
+
         private void SelfShowFromTray()
         {
             this.Show();
