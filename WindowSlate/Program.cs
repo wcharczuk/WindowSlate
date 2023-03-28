@@ -8,16 +8,28 @@ namespace WindowSlate
 {
     internal static class Program
     {
+        private static string _appGuid = "B4BE9704-485F-4F43-BC77-3C124103FD61";
+
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            Application.Run(new Settings());
+            using (Mutex mutex = new Mutex(false, "Global\\" + _appGuid))
+            {
+                if (!mutex.WaitOne(0, false))
+                {
+                    MessageBox.Show("Window Slate already running");
+                    return;
+                }
+
+                // To customize application configuration such as set high DPI settings or default font,
+                // see https://aka.ms/applicationconfiguration.
+                ApplicationConfiguration.Initialize();
+                Application.Run(new Settings());
+            }
         }
     }
 }
+

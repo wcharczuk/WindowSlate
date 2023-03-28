@@ -308,6 +308,7 @@ namespace WindowSlate
         #endregion
 
         #region Input Helpers
+        
         public void RegisterHotKeys()
         {
             foreach (var hotkey in this.hotkeys)
@@ -315,6 +316,7 @@ namespace WindowSlate
                 hotkey.Input.Register();
             }
         }
+
         public void SaveSettings()
         {
             var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\WindowSlate", true);
@@ -334,6 +336,7 @@ namespace WindowSlate
                 storedSettings.Close();
             }
         }
+
         public void UnregisterHotKeys()
         {
             foreach (var hotkey in this.hotkeys)
@@ -341,6 +344,7 @@ namespace WindowSlate
                 hotkey.Input.Unregister();
             }
         }
+        
         #endregion
 
         #region Movement Handlers
