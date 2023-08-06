@@ -35,11 +35,12 @@ namespace WindowSlate
     {
         public List<HotKeyInfo> hotkeys;
     
-        static string SETTINGS_KEY_START_MINIMIZED = "start-inimized";
+        static string SETTINGS_KEY_START_MINIMIZED = "start-minimized";
 
         public Settings()
         {
             this.KeyPreview = true;
+            this.ShowInTaskbar = false;
 
             this.hotkeys = new()
             {
@@ -102,13 +103,13 @@ namespace WindowSlate
                 new HotKeyInfo() with {
                     Description = "Previous-Display",
                     SettingsKey = "previous-display",
-                    DefaultHotKey = new HotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt),
+                    DefaultHotKey = new HotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt),
                     MovementHandler = this.PreviousDisplay,
                 },
                 new HotKeyInfo() with {
                     Description = "Next-display",
                     SettingsKey = "next-display",
-                    DefaultHotKey = new HotKey(Keys.L, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt),
+                    DefaultHotKey = new HotKey(Keys.H, KeyModifiers.Control | KeyModifiers.Shift | KeyModifiers.Alt),
                     MovementHandler = this.NextDisplay,
                 },
             };
@@ -118,6 +119,7 @@ namespace WindowSlate
             {
                 storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WindowSlate");
             }
+
             try
             {
                 foreach (var hotkey in this.hotkeys)
@@ -165,6 +167,7 @@ namespace WindowSlate
                 }
             }
 
+            // inputY is the position we start drawing controls from within the settings window
             var inputY = 20;
             groupBox.SuspendLayout();
             this.SuspendLayout();
@@ -237,6 +240,9 @@ namespace WindowSlate
         {
             try
             {
+                // TODO(wc): we can ~likely~ make this faster
+                // by storing the hotkeys as a hash of their string form
+                // and look them up by that hash but this works fine for now!
                 foreach (var hotkey in this.hotkeys)
                 {
                     if (hotkey.Input.HotKey == null) { continue; }
@@ -251,7 +257,10 @@ namespace WindowSlate
                     }
                 }
             }
-            catch { } // not great!
+            catch (Exception ex) 
+            {
+                this.trayIcon.ShowBalloonTip(5000, "Window Movement Error", ex.ToString(), ToolTipIcon.Error);
+            }
         }
        
         private void runOnStartCheckbox_CheckedChanged(object? sender, EventArgs e)
@@ -331,9 +340,14 @@ namespace WindowSlate
                     storedSettings.SetValue(hotkey.SettingsKey, hotkey.Input.HotKey != null ? hotkey.Input.HotKey.ToString() : "");
                 }
             }
+            catch(Exception ex)
+            {
+                this.trayIcon.ShowBalloonTip(5000, "Save Settings Error", ex.ToString(), ToolTipIcon.Error);
+            }
             finally
             {
                 storedSettings.Close();
+                this.trayIcon.ShowBalloonTip(5000, "Status", "Settings Saved!", ToolTipIcon.Info);
             }
         }
 
@@ -348,16 +362,19 @@ namespace WindowSlate
         #endregion
 
         #region Movement Handlers
+
         private void Maximize()
         {
             var window = Win32Util.GetForegroundWindow();
             this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Maximized);
         }
+
         private void Unmaximize()
         {
             var window = Win32Util.GetForegroundWindow();
             this.SetTargetWindowMaximizedState(window, ShowWindowCommands.Normal);
         }
+
         private void HalfLeft()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -403,6 +420,7 @@ namespace WindowSlate
                 Bottom = newBottom,
             });
         }
+
         private void HalfRight()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -449,6 +467,7 @@ namespace WindowSlate
                 Bottom = newBottom,
             });
         }
+
         private void MiddleTwoThirds()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -497,6 +516,7 @@ namespace WindowSlate
                 Bottom = newBottom,
             });
         }
+
         private void TopLeft()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -540,6 +560,7 @@ namespace WindowSlate
                 Bottom = newBottom,
             });
         }
+
         private void TopRight()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -584,6 +605,7 @@ namespace WindowSlate
                 Bottom = newBottom,
             });
         }
+
         private void BottomLeft()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -631,6 +653,7 @@ namespace WindowSlate
                 Bottom = newBottom,
             });
         }
+
         private void BottomRight()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -679,6 +702,7 @@ namespace WindowSlate
                 Bottom = newBottom,
             });
         }
+
         private void PreviousDisplay()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -703,6 +727,7 @@ namespace WindowSlate
                 Bottom = nextScreen.Bounds.Y + windowHeight
             });
         }
+
         private void NextDisplay()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -723,6 +748,7 @@ namespace WindowSlate
                 Bottom = nextScreen.Bounds.Y + windowHeight
             });
         }
+        
         #endregion
 
         #region Helpers
@@ -765,6 +791,13 @@ namespace WindowSlate
             }
         }
 
+        /// <summary>
+        /// IsMonitorPrimary returns if the current "foreground" window is the "primary" monitor.
+        /// 
+        /// This specifically affects if the taskbar is drawn on the monitor, and we need to account
+        /// for the taskbar height when we size windows.
+        /// </summary>
+        /// <returns></returns>
         private bool IsMonitorPrimary()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -772,6 +805,11 @@ namespace WindowSlate
             return monitor.dwFlags == 0x1;
         }
 
+        /// <summary>
+        /// GetMonitorIndex gets the monitor "index" of the current "foreground" window.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private int GetMonitorIndex()
         {
             var window = Win32Util.GetForegroundWindow();
@@ -790,6 +828,8 @@ namespace WindowSlate
             throw new Exception($"Could not find index of monitor with device name {monitorDeviceNameClean}");
         }
 
+        // TrimSuffix is a helper string function that removes a suffix from a string
+        // but only if it's present at the end of the string.
         private static string TrimSuffix(string str, string suffix)
         {
             if (str.EndsWith(suffix))
