@@ -187,7 +187,6 @@ namespace WindowSlate
             this.KeyDown += Settings_KeyDown;
             HotKeyManager.HotKeyPressed += HotKeyManager_HotKeyPressed;
             this.Resize += Settings_Resize;
-            this.FormClosing += Settings_FormClosing;
             this.trayIcon.MouseDoubleClick += trayIcon_DoubleClick;
             this.runOnStartCheckbox.CheckedChanged += runOnStartCheckbox_CheckedChanged;
             this.startMinimizedCheckbox.CheckedChanged += startMinimizedCheckbox_CheckedChanged;
@@ -199,14 +198,6 @@ namespace WindowSlate
         }
 
         #region Event Handlers
-
-        private void Settings_FormClosing(object? sender, FormClosingEventArgs e)
-        {
-            if (MessageBox.Show("Are you sure you want to quit?", "Window Slate", MessageBoxButtons.YesNo) == DialogResult.No)
-            {
-                e.Cancel = true;
-            }
-        }
 
         private void Settings_Resize(object? sender, EventArgs e)
         {
