@@ -18,8 +18,8 @@ namespace WindowSlate
             InitializeComponent();
         }
 
-        public HotKey? _previousHotKey;
-        public HotKey? _hotKey;
+        private HotKey? _previousHotKey;
+        private HotKey? _hotKey;
         public HotKey? HotKey
         {
             get => this._hotKey;
@@ -66,6 +66,7 @@ namespace WindowSlate
             this.Unregister();
             if (hotKey != null)
             {
+
                 this.hotKeyLabel.Text = hotKey.ToString();
                 this.Register();
             }
@@ -81,7 +82,6 @@ namespace WindowSlate
             {
                 this.UnregisterHotKeysHandler();
             }
-
             _previousHotKey = _hotKey;
             this.HotKey = null; // also reflects in the text
             this.IsCapturing = true;
@@ -93,21 +93,30 @@ namespace WindowSlate
 
         private void setDone_Click(object sender, EventArgs e)
         {
-            this.IsCapturing = false;
-
-            this.set.Visible = true;
-            this.clear.Visible = true;
-            this.setDone.Visible = false;
-            this.cancel.Visible = false;
-
             if (_hotKey != null)
             {
+                try
+                {
+                    _hotKey.Validate();
+                } catch(Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Settings Error");
+                    return;
+                }
+
                 this.hotKeyLabel.Text = _hotKey.ToString();
             }
             else
             {
                 this.hotKeyLabel.Text = "";
             }
+            
+            this.IsCapturing = false;
+
+            this.set.Visible = true;
+            this.clear.Visible = true;
+            this.setDone.Visible = false;
+            this.cancel.Visible = false;
 
             if (this.RegisterHotKeysHandler != null)
             {

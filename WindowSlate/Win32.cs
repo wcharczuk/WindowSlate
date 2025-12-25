@@ -84,7 +84,7 @@ namespace WindowSlate
         {
             var windowTextLength = Win32.GetWindowTextLength(hWnd);
             var stringBuffer = new StringBuilder(windowTextLength + 1);
-            if (!Win32.GetWindowText(hWnd, stringBuffer, windowTextLength))
+            if (!Win32.GetWindowText(hWnd, stringBuffer, windowTextLength + 1))
             {
                 throw new Exception($"Could not get window text for window with pointer: {hWnd}");
             }

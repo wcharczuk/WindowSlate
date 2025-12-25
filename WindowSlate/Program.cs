@@ -8,7 +8,7 @@ namespace WindowSlate
 {
     internal static class Program
     {
-        private static string _appGuid = "B4BE9704-485F-4F43-BC77-3C124103FD61";
+        private static readonly string _appGuid = "B4BE9704-485F-4F43-BC77-3C124103FD61";
 
         /// <summary>
         /// The main entry point for the application.

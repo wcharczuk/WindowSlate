@@ -8,7 +8,7 @@ namespace WindowSlate
 {
     public class HotKey
     {
-        private static List<KeyModifiers> standardModifiers = new() { 
+        private static readonly List<KeyModifiers> standardModifiers = new() { 
             KeyModifiers.Windows,
             KeyModifiers.Control, 
             KeyModifiers.Alt, 
@@ -98,6 +98,18 @@ namespace WindowSlate
 
             Key = k;
             KeyModifiers = m;
+        }
+
+        public void Validate()
+        {
+            if (this.Key == 0)
+            {
+                throw new Exception($"Cannot parse HotKey; must have a letter or digit chord component");
+            }
+            if (this.KeyModifiers == 0)
+            {
+                throw new Exception($"Cannot parse HotKey; must have a modifier chord component");
+            }
         }
 
         public Keys Key { get; set; }

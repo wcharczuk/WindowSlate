@@ -33,7 +33,7 @@ namespace WindowSlate
 
     public partial class Settings : Form
     {
-        public List<HotKeyInfo> hotkeys;
+        private readonly List<HotKeyInfo> hotkeys;
     
         static string SETTINGS_KEY_START_MINIMIZED = "start-minimized";
 
@@ -51,7 +51,7 @@ namespace WindowSlate
                     MovementHandler = this.Maximize
                 },
                 new HotKeyInfo() with {
-                    Description = "Unaximize",
+                    Description = "Unmaximize",
                     SettingsKey = "unmaximize",
                     DefaultHotKey = new HotKey(Keys.J, KeyModifiers.Control | KeyModifiers.Alt),
                     MovementHandler = this.Unmaximize
@@ -134,7 +134,15 @@ namespace WindowSlate
                     {
                         if ((string)setting != "")
                         {
-                            hotkey.Input.HotKey = new HotKey((string)setting);
+                            try
+                            {
+                                var parsedHotkey = new HotKey((string)setting);
+                                hotkey.Input.HotKey = parsedHotkey;
+                            }
+                            catch(Exception ex)
+                            {
+                                MessageBox.Show(ex.ToString(), "Settings Error");
+                            }
                         }
                     }
                     else
@@ -295,17 +303,20 @@ namespace WindowSlate
             var storedSettings = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\WindowSlate", true);
             if (storedSettings == null)
             {
-                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WindowSlate", true);
+                storedSettings = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\WindowSlate");
             }
             try
             {
                 if(startMinimizedCheckbox.Checked)
                 {
                     storedSettings.SetValue(SETTINGS_KEY_START_MINIMIZED, "true");
-                } 
+                }
                 else
                 {
-                    storedSettings.DeleteValue(SETTINGS_KEY_START_MINIMIZED);
+                    if (storedSettings.GetValue(SETTINGS_KEY_START_MINIMIZED) != null)
+                    {
+                        storedSettings.DeleteValue(SETTINGS_KEY_START_MINIMIZED);
+                    }
                 }
             }
             finally
@@ -337,7 +348,10 @@ namespace WindowSlate
             {
                 foreach (var hotkey in hotkeys)
                 {
-                    storedSettings.SetValue(hotkey.SettingsKey, hotkey.Input.HotKey != null ? hotkey.Input.HotKey.ToString() : "");
+                    if (hotkey.Input != null && hotkey.Input.HotKey != null)
+                    {
+                        storedSettings.SetValue(hotkey.SettingsKey, hotkey.Input.HotKey != null ? hotkey.Input.HotKey.ToString() : "");
+                    }
                 }
             }
             catch(Exception ex)
